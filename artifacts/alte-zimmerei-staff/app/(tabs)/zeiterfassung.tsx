@@ -17,25 +17,19 @@ import { SectionHeader } from "@/components/ui/SectionHeader";
 import { mockTimeRecords, monthlyStats } from "@/data/mockTimeRecords";
 import type { BookingType } from "@/types";
 
-const BOOKING_LABELS: Record<BookingType, string> = {
+const BOOKING_LABELS: Partial<Record<BookingType, string>> = {
   checkin: "Einstempeln",
   checkout: "Ausstempeln",
-  break_start: "Pause begonnen",
-  break_end: "Pause beendet",
 };
 
-const BOOKING_ICONS: Record<BookingType, string> = {
+const BOOKING_ICONS: Partial<Record<BookingType, string>> = {
   checkin: "log-in",
   checkout: "log-out",
-  break_start: "coffee",
-  break_end: "play",
 };
 
 const BOOKING_COLORS: Record<string, string> = {
   checkin: "#30D158",
   checkout: "#FF453A",
-  break_start: "#FFD60A",
-  break_end: "#E89F3F",
 };
 
 function formatMinutes(minutes: number): string {
@@ -56,8 +50,7 @@ function formatDate(dateStr: string): string {
 export default function ZeiterfassungScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const { isCheckedIn, checkInTime, isOnBreak, checkIn, checkOut, toggleBreak } =
-    useAppContext();
+  const { isCheckedIn, checkInTime, checkIn, checkOut } = useAppContext();
 
   const isWeb = Platform.OS === "web";
   const topPad = isWeb ? 67 : insets.top;
@@ -74,12 +67,12 @@ export default function ZeiterfassungScreen() {
     );
   };
 
-  const recentRecords = mockTimeRecords.slice(1);
-
-  const workedPercent = Math.min(
-    (monthlyStats.workedHours / monthlyStats.targetHours) * 100,
-    100
-  );
+  const recentRecords = mockTimeRecords.slice(1).map((record) => ({
+    ...record,
+    bookings: record.bookings.filter(
+      (b) => b.type !== "break_start" && b.type !== "break_end"
+    ),
+  }));
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -116,8 +109,6 @@ export default function ZeiterfassungScreen() {
             checkInTime={checkInTime}
             onCheckIn={checkIn}
             onCheckOut={handleCheckOut}
-            onBreak={toggleBreak}
-            isOnBreak={isOnBreak}
           />
         </Card>
 
@@ -142,78 +133,7 @@ export default function ZeiterfassungScreen() {
                 Gearbeitet
               </Text>
             </View>
-            <View
-              style={[styles.statDivider, { backgroundColor: colors.border }]}
-            />
-            <View style={styles.statItem}>
-              <Text
-                style={[
-                  styles.statValue,
-                  { color: colors.foreground, fontFamily: "Inter_700Bold" },
-                ]}
-              >
-                {monthlyStats.targetHours}h
-              </Text>
-              <Text
-                style={[
-                  styles.statLabel,
-                  { color: colors.mutedForeground, fontFamily: "Inter_400Regular" },
-                ]}
-              >
-                Soll
-              </Text>
-            </View>
-            <View
-              style={[styles.statDivider, { backgroundColor: colors.border }]}
-            />
-            <View style={styles.statItem}>
-              <Text
-                style={[
-                  styles.statValue,
-                  {
-                    color: colors.primary,
-                    fontFamily: "Inter_700Bold",
-                  },
-                ]}
-              >
-                {monthlyStats.remainingHours}h
-              </Text>
-              <Text
-                style={[
-                  styles.statLabel,
-                  { color: colors.mutedForeground, fontFamily: "Inter_400Regular" },
-                ]}
-              >
-                Verbleibend
-              </Text>
-            </View>
           </View>
-
-          <View
-            style={[
-              styles.progressBar,
-              { backgroundColor: colors.muted, borderRadius: 4 },
-            ]}
-          >
-            <View
-              style={[
-                styles.progressFill,
-                {
-                  width: `${workedPercent}%`,
-                  backgroundColor: colors.primary,
-                  borderRadius: 4,
-                },
-              ]}
-            />
-          </View>
-          <Text
-            style={[
-              styles.progressLabel,
-              { color: colors.mutedForeground, fontFamily: "Inter_400Regular" },
-            ]}
-          >
-            {workedPercent.toFixed(1)}% des Monatssolls erreicht
-          </Text>
         </Card>
 
         <SectionHeader title="Letzte Buchungen" style={styles.sectionHeader} />
@@ -335,22 +255,6 @@ const styles = StyleSheet.create({
     fontSize: 22,
   },
   statLabel: {
-    fontSize: 12,
-  },
-  statDivider: {
-    width: StyleSheet.hairlineWidth,
-    height: 36,
-  },
-  progressBar: {
-    height: 6,
-    width: "100%",
-    overflow: "hidden",
-    marginBottom: 6,
-  },
-  progressFill: {
-    height: "100%",
-  },
-  progressLabel: {
     fontSize: 12,
   },
   sectionHeader: {

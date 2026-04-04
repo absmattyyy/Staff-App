@@ -9,8 +9,6 @@ interface ClockWidgetProps {
   checkInTime?: string;
   onCheckIn: () => void;
   onCheckOut: () => void;
-  onBreak: () => void;
-  isOnBreak: boolean;
 }
 
 function formatDuration(startTimeStr: string): string {
@@ -38,8 +36,6 @@ export function ClockWidget({
   checkInTime,
   onCheckIn,
   onCheckOut,
-  onBreak,
-  isOnBreak,
 }: ClockWidgetProps) {
   const colors = useColors();
   const [currentTime, setCurrentTime] = useState(getCurrentTime());
@@ -50,12 +46,12 @@ export function ClockWidget({
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentTime(getCurrentTime());
-      if (isCheckedIn && checkInTime && !isOnBreak) {
+      if (isCheckedIn && checkInTime) {
         setDuration(formatDuration(checkInTime));
       }
     }, 1000);
     return () => clearInterval(interval);
-  }, [isCheckedIn, checkInTime, isOnBreak]);
+  }, [isCheckedIn, checkInTime]);
 
   const handleMainAction = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
@@ -64,11 +60,6 @@ export function ClockWidget({
     } else {
       onCheckIn();
     }
-  };
-
-  const handleBreak = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    onBreak();
   };
 
   return (
@@ -88,7 +79,7 @@ export function ClockWidget({
             style={[
               styles.statusDot,
               {
-                backgroundColor: isOnBreak ? colors.warning : colors.success,
+                backgroundColor: colors.success,
               },
             ]}
           />
@@ -96,12 +87,12 @@ export function ClockWidget({
             style={[
               styles.statusText,
               {
-                color: isOnBreak ? colors.warning : colors.success,
+                color: colors.success,
                 fontFamily: "Inter_500Medium",
               },
             ]}
           >
-            {isOnBreak ? "Pause" : "Eingestempelt"} · {duration}
+            Eingestempelt · {duration}
           </Text>
         </View>
       )}
@@ -145,34 +136,6 @@ export function ClockWidget({
         </Text>
       </TouchableOpacity>
 
-      {isCheckedIn && (
-        <TouchableOpacity
-          onPress={handleBreak}
-          activeOpacity={0.8}
-          style={[
-            styles.breakButton,
-            {
-              backgroundColor: colors.secondary,
-              borderColor: colors.border,
-              borderRadius: 12,
-            },
-          ]}
-        >
-          <Feather
-            name={isOnBreak ? "play" : "coffee"}
-            size={18}
-            color={colors.primary}
-          />
-          <Text
-            style={[
-              styles.breakLabel,
-              { color: colors.foreground, fontFamily: "Inter_500Medium" },
-            ]}
-          >
-            {isOnBreak ? "Pause beenden" : "Pause starten"}
-          </Text>
-        </TouchableOpacity>
-      )}
     </View>
   );
 }
@@ -215,16 +178,5 @@ const styles = StyleSheet.create({
   },
   mainButtonLabel: {
     fontSize: 18,
-  },
-  breakButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderWidth: StyleSheet.hairlineWidth,
-  },
-  breakLabel: {
-    fontSize: 14,
   },
 });
