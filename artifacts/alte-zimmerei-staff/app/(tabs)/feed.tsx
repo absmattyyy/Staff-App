@@ -12,20 +12,24 @@ import { Feather } from "@expo/vector-icons";
 import { useColors } from "@/hooks/useColors";
 import { SegmentControl } from "@/components/ui/SegmentControl";
 import { FeedPostCard } from "@/components/feed/FeedPostCard";
-import { mockFeedPosts } from "@/data/mockFeed";
-import type { FeedPost } from "@/types";
+import { CreatePostModal } from "@/components/feed/CreatePostModal";
+import { CommentsModal } from "@/components/feed/CommentsModal";
+import { useFeed } from "@/context/FeedContext";
 
 type FeedTab = "news" | "general";
 
 export default function FeedScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const [activeTab, setActiveTab] = useState<FeedTab>("news");
+  const { posts } = useFeed();
 
-  const filtered = mockFeedPosts.filter((p) => {
-    if (activeTab === "news") return p.category === "news";
-    return p.category === "general";
-  });
+  const [activeTab, setActiveTab] = useState<FeedTab>("news");
+  const [showCreatePost, setShowCreatePost] = useState(false);
+  const [commentsPostId, setCommentsPostId] = useState<string | null>(null);
+
+  const filtered = posts.filter((p) =>
+    activeTab === "news" ? p.category === "news" : p.category === "general"
+  );
 
   const sorted = [...filtered].sort((a, b) => {
     if (a.isPinned && !b.isPinned) return -1;
@@ -40,9 +44,8 @@ export default function FeedScreen() {
   const bottomPad = isWeb ? 34 : insets.bottom;
 
   return (
-    <View
-      style={[styles.container, { backgroundColor: colors.background }]}
-    >
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      {/* Header */}
       <View
         style={[
           styles.header,
@@ -61,11 +64,16 @@ export default function FeedScreen() {
         >
           Feed
         </Text>
-        <TouchableOpacity activeOpacity={0.7}>
+        <TouchableOpacity
+          onPress={() => setShowCreatePost(true)}
+          activeOpacity={0.7}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
           <Feather name="edit" size={20} color={colors.primary} />
         </TouchableOpacity>
       </View>
 
+      {/* Segment */}
       <View
         style={[
           styles.segmentWrapper,
@@ -85,18 +93,42 @@ export default function FeedScreen() {
         />
       </View>
 
+      {/* Post list */}
       <FlatList
         data={sorted}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <FeedPostCard post={item} />}
-        contentContainerStyle={[
-          styles.list,
-          {
-            paddingBottom: bottomPad + 100,
-          },
-        ]}
+        renderItem={({ item }) => (
+          <FeedPostCard
+            post={item}
+            onOpenComments={(postId) => setCommentsPostId(postId)}
+          />
+        )}
+        contentContainerStyle={[styles.list, { paddingBottom: bottomPad + 100 }]}
         showsVerticalScrollIndicator={false}
-        scrollEnabled={sorted.length > 0}
+        ListEmptyComponent={
+          <View style={styles.empty}>
+            <Feather name="inbox" size={36} color={colors.mutedForeground} />
+            <Text
+              style={[
+                styles.emptyText,
+                { color: colors.mutedForeground, fontFamily: "Inter_400Regular" },
+              ]}
+            >
+              Keine Beiträge vorhanden
+            </Text>
+          </View>
+        }
+      />
+
+      {/* Modals */}
+      <CreatePostModal
+        visible={showCreatePost}
+        onClose={() => setShowCreatePost(false)}
+      />
+      <CommentsModal
+        visible={commentsPostId !== null}
+        postId={commentsPostId}
+        onClose={() => setCommentsPostId(null)}
       />
     </View>
   );
@@ -124,5 +156,14 @@ const styles = StyleSheet.create({
   },
   list: {
     padding: 16,
+  },
+  empty: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingTop: 80,
+    gap: 12,
+  },
+  emptyText: {
+    fontSize: 15,
   },
 });

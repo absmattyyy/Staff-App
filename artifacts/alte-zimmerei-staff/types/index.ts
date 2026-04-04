@@ -83,6 +83,18 @@ export interface SwapRequest {
   isOwn: boolean;
 }
 
+export interface Comment {
+  id: string;
+  postId: string;
+  author: {
+    id: string;
+    name: string;
+    role: string;
+  };
+  content: string;
+  createdAt: string;
+}
+
 export interface MenuItem {
   id: string;
   label: string;

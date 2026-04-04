@@ -11,10 +11,12 @@ import * as Haptics from "expo-haptics";
 import { useColors } from "@/hooks/useColors";
 import { Avatar } from "@/components/ui/Avatar";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { useFeed } from "@/context/FeedContext";
 import type { FeedPost } from "@/types";
 
 interface FeedPostCardProps {
   post: FeedPost;
+  onOpenComments: (postId: string) => void;
 }
 
 function formatTime(dateStr: string): string {
@@ -30,27 +32,28 @@ function formatTime(dateStr: string): string {
   return date.toLocaleDateString("de-DE", { day: "numeric", month: "short" });
 }
 
-export function FeedPostCard({ post }: FeedPostCardProps) {
+export function FeedPostCard({ post, onOpenComments }: FeedPostCardProps) {
   const colors = useColors();
-  const [liked, setLiked] = useState(false);
-  const [localLikes, setLocalLikes] = useState(post.reactions.like);
+  const { toggleLike, likedPostIds, posts } = useFeed();
   const [expanded, setExpanded] = useState(false);
+
+  const livePost = posts.find((p) => p.id === post.id) ?? post;
+  const liked = likedPostIds.has(post.id);
 
   const handleLike = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    if (liked) {
-      setLocalLikes((prev) => prev - 1);
-    } else {
-      setLocalLikes((prev) => prev + 1);
-    }
-    setLiked((prev) => !prev);
+    toggleLike(post.id);
   };
 
-  const shouldTruncate = post.content.length > 150;
+  const handleComment = () => {
+    onOpenComments(post.id);
+  };
+
+  const shouldTruncate = livePost.content.length > 150;
   const displayContent =
     shouldTruncate && !expanded
-      ? post.content.slice(0, 150) + "..."
-      : post.content;
+      ? livePost.content.slice(0, 150) + "..."
+      : livePost.content;
 
   return (
     <View
@@ -58,28 +61,24 @@ export function FeedPostCard({ post }: FeedPostCardProps) {
         styles.card,
         {
           backgroundColor: colors.card,
-          borderColor: post.isImportant
+          borderColor: livePost.isImportant
             ? colors.destructive + "40"
-            : post.isPinned
+            : livePost.isPinned
             ? colors.primary + "40"
             : colors.border,
           borderRadius: 14,
         },
       ]}
     >
-      {(post.isPinned || post.isImportant) && (
+      {(livePost.isPinned || livePost.isImportant) && (
         <View style={styles.tagRow}>
-          {post.isPinned && (
-            <StatusBadge variant="pinned" size="sm" />
-          )}
-          {post.isImportant && (
-            <StatusBadge variant="important" size="sm" />
-          )}
+          {livePost.isPinned && <StatusBadge variant="pinned" size="sm" />}
+          {livePost.isImportant && <StatusBadge variant="important" size="sm" />}
         </View>
       )}
 
       <View style={styles.header}>
-        <Avatar name={post.author.name} size={40} />
+        <Avatar name={livePost.author.name} size={40} />
         <View style={styles.authorInfo}>
           <Text
             style={[
@@ -87,7 +86,7 @@ export function FeedPostCard({ post }: FeedPostCardProps) {
               { color: colors.foreground, fontFamily: "Inter_600SemiBold" },
             ]}
           >
-            {post.author.name}
+            {livePost.author.name}
           </Text>
           <View style={styles.metaRow}>
             <Text
@@ -96,18 +95,16 @@ export function FeedPostCard({ post }: FeedPostCardProps) {
                 { color: colors.mutedForeground, fontFamily: "Inter_400Regular" },
               ]}
             >
-              {post.author.role}
+              {livePost.author.role}
             </Text>
-            <Text style={[styles.dot, { color: colors.mutedForeground }]}>
-              ·
-            </Text>
+            <Text style={[styles.dot, { color: colors.mutedForeground }]}>·</Text>
             <Text
               style={[
                 styles.meta,
                 { color: colors.mutedForeground, fontFamily: "Inter_400Regular" },
               ]}
             >
-              {formatTime(post.createdAt)}
+              {formatTime(livePost.createdAt)}
             </Text>
           </View>
         </View>
@@ -121,6 +118,7 @@ export function FeedPostCard({ post }: FeedPostCardProps) {
       >
         {displayContent}
       </Text>
+
       {shouldTruncate && (
         <TouchableOpacity onPress={() => setExpanded(!expanded)}>
           <Text
@@ -134,22 +132,23 @@ export function FeedPostCard({ post }: FeedPostCardProps) {
         </TouchableOpacity>
       )}
 
-      {post.image && (
+      {livePost.image && (
         <Image
-          source={{ uri: post.image }}
+          source={{ uri: livePost.image }}
           style={[styles.postImage, { borderRadius: 10 }]}
           resizeMode="cover"
         />
       )}
 
       <View style={[styles.footer, { borderTopColor: colors.border }]}>
+        {/* Like */}
         <TouchableOpacity
           onPress={handleLike}
           activeOpacity={0.7}
           style={styles.actionBtn}
         >
           <Feather
-            name={liked ? "thumbs-up" : "thumbs-up"}
+            name="thumbs-up"
             size={15}
             color={liked ? colors.primary : colors.mutedForeground}
           />
@@ -158,15 +157,20 @@ export function FeedPostCard({ post }: FeedPostCardProps) {
               styles.actionText,
               {
                 color: liked ? colors.primary : colors.mutedForeground,
-                fontFamily: "Inter_500Medium",
+                fontFamily: liked ? "Inter_600SemiBold" : "Inter_400Regular",
               },
             ]}
           >
-            {localLikes}
+            {livePost.reactions.like}
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity activeOpacity={0.7} style={styles.actionBtn}>
+        {/* Comments */}
+        <TouchableOpacity
+          onPress={handleComment}
+          activeOpacity={0.7}
+          style={styles.actionBtn}
+        >
           <Feather name="message-circle" size={15} color={colors.mutedForeground} />
           <Text
             style={[
@@ -174,10 +178,11 @@ export function FeedPostCard({ post }: FeedPostCardProps) {
               { color: colors.mutedForeground, fontFamily: "Inter_400Regular" },
             ]}
           >
-            {post.commentsCount}
+            {livePost.commentsCount}
           </Text>
         </TouchableOpacity>
 
+        {/* Share */}
         <TouchableOpacity activeOpacity={0.7} style={styles.actionBtn}>
           <Feather name="share" size={15} color={colors.mutedForeground} />
         </TouchableOpacity>
