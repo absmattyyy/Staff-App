@@ -29,12 +29,6 @@ export const mockMenuItems: MenuItem[][] = [
       sublabel: "Wunschdaten & Sperrzeiten",
       icon: "clock",
     },
-    {
-      id: "documents",
-      label: "Dokumente",
-      sublabel: "Verträge & Unterlagen",
-      icon: "file-text",
-    },
   ],
   [
     {

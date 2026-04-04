@@ -20,7 +20,6 @@ import { useAppContext } from "@/context/AppContext";
 import { ProfileModal } from "@/components/mehr/ProfileModal";
 import { NotificationsModal } from "@/components/mehr/NotificationsModal";
 import { MeetingsModal } from "@/components/mehr/MeetingsModal";
-import { DocumentsModal } from "@/components/mehr/DocumentsModal";
 import { SettingsModal } from "@/components/mehr/SettingsModal";
 import { SupportModal } from "@/components/mehr/SupportModal";
 import { UnavailabilityModal } from "@/components/dienstplan/UnavailabilityModal";
@@ -28,7 +27,7 @@ import { UnavailabilityModal } from "@/components/dienstplan/UnavailabilityModal
 export default function MehrScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const { user, isCheckedIn } = useAppContext();
+  const { user } = useAppContext();
 
   const isWeb = Platform.OS === "web";
   const topPad = isWeb ? 67 : insets.top;
@@ -38,7 +37,6 @@ export default function MehrScreen() {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [meetingsOpen, setMeetingsOpen] = useState(false);
   const [availabilityOpen, setAvailabilityOpen] = useState(false);
-  const [documentsOpen, setDocumentsOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [supportOpen, setSupportOpen] = useState(false);
 
@@ -56,9 +54,6 @@ export default function MehrScreen() {
         break;
       case "availability":
         setAvailabilityOpen(true);
-        break;
-      case "documents":
-        setDocumentsOpen(true);
         break;
       case "settings":
         setSettingsOpen(true);
@@ -164,65 +159,6 @@ export default function MehrScreen() {
           </View>
         </TouchableOpacity>
 
-        <View style={styles.infoRow}>
-          <View
-            style={[
-              styles.infoChip,
-              {
-                backgroundColor: isCheckedIn
-                  ? colors.success + "18"
-                  : colors.muted,
-                borderRadius: 10,
-              },
-            ]}
-          >
-            <View
-              style={[
-                styles.statusDot,
-                {
-                  backgroundColor: isCheckedIn
-                    ? colors.success
-                    : colors.mutedForeground,
-                },
-              ]}
-            />
-            <Text
-              style={[
-                styles.infoChipText,
-                {
-                  color: isCheckedIn ? colors.success : colors.mutedForeground,
-                  fontFamily: "Inter_500Medium",
-                },
-              ]}
-            >
-              {isCheckedIn ? "Eingestempelt" : "Ausgestempelt"}
-            </Text>
-          </View>
-          <View
-            style={[
-              styles.infoChip,
-              {
-                backgroundColor: colors.card,
-                borderRadius: 10,
-                borderColor: colors.border,
-              },
-            ]}
-          >
-            <Feather name="calendar" size={13} color={colors.mutedForeground} />
-            <Text
-              style={[
-                styles.infoChipText,
-                {
-                  color: colors.mutedForeground,
-                  fontFamily: "Inter_400Regular",
-                },
-              ]}
-            >
-              Seit {user.joinedAt.split("-")[0]}
-            </Text>
-          </View>
-        </View>
-
         {mockMenuItems.map((group, groupIdx) => (
           <Card key={groupIdx} noPadding style={styles.menuGroup}>
             {group.map((item, itemIdx) => (
@@ -278,10 +214,6 @@ export default function MehrScreen() {
         visible={availabilityOpen}
         onClose={() => setAvailabilityOpen(false)}
       />
-      <DocumentsModal
-        visible={documentsOpen}
-        onClose={() => setDocumentsOpen(false)}
-      />
       <SettingsModal
         visible={settingsOpen}
         onClose={() => setSettingsOpen(false)}
@@ -333,27 +265,6 @@ const styles = StyleSheet.create({
   },
   profileEdit: {
     padding: 4,
-  },
-  infoRow: {
-    flexDirection: "row",
-    gap: 8,
-    marginBottom: 4,
-  },
-  infoChip: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderWidth: StyleSheet.hairlineWidth,
-  },
-  statusDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 3.5,
-  },
-  infoChipText: {
-    fontSize: 13,
   },
   menuGroup: {
     overflow: "hidden",

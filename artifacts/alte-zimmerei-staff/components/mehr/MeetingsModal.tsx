@@ -50,17 +50,21 @@ export function MeetingsModal({ visible, onClose }: MeetingsModalProps) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
+  const isMeeting = (name: string) =>
+    name.toLowerCase().includes("meeting") ||
+    name.toLowerCase().includes("besprechung");
+
   const upcomingEvents = events
     .filter((e) => {
       const d = new Date(e.date + "T00:00:00");
-      return d >= today && e.status !== "cancelled";
+      return d >= today && e.status !== "cancelled" && isMeeting(e.name);
     })
     .sort((a, b) => a.date.localeCompare(b.date));
 
   const pastEvents = events
     .filter((e) => {
       const d = new Date(e.date + "T00:00:00");
-      return d < today;
+      return d < today && isMeeting(e.name);
     })
     .sort((a, b) => b.date.localeCompare(a.date))
     .slice(0, 3);
