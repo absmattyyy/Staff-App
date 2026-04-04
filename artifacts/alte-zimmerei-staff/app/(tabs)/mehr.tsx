@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -17,35 +17,71 @@ import { ListItem } from "@/components/ui/ListItem";
 import { Card } from "@/components/ui/Card";
 import { mockMenuItems } from "@/data/mockMenu";
 import { useAppContext } from "@/context/AppContext";
+import { ProfileModal } from "@/components/mehr/ProfileModal";
+import { NotificationsModal } from "@/components/mehr/NotificationsModal";
+import { MeetingsModal } from "@/components/mehr/MeetingsModal";
+import { DocumentsModal } from "@/components/mehr/DocumentsModal";
+import { SettingsModal } from "@/components/mehr/SettingsModal";
+import { SupportModal } from "@/components/mehr/SupportModal";
+import { UnavailabilityModal } from "@/components/dienstplan/UnavailabilityModal";
 
 export default function MehrScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const { user } = useAppContext();
+  const { user, isCheckedIn } = useAppContext();
 
   const isWeb = Platform.OS === "web";
   const topPad = isWeb ? 67 : insets.top;
   const bottomPad = isWeb ? 34 : insets.bottom;
 
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [meetingsOpen, setMeetingsOpen] = useState(false);
+  const [availabilityOpen, setAvailabilityOpen] = useState(false);
+  const [documentsOpen, setDocumentsOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [supportOpen, setSupportOpen] = useState(false);
+
   const handleMenuItem = (id: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    if (id === "logout") {
-      Alert.alert(
-        "Abmelden",
-        "Möchtest du dich wirklich abmelden?",
-        [
-          { text: "Abbrechen", style: "cancel" },
-          {
-            text: "Abmelden",
-            style: "destructive",
-            onPress: () => {
-              Alert.alert("Abgemeldet", "Du wurdest erfolgreich abgemeldet.");
+    switch (id) {
+      case "profile":
+        setProfileOpen(true);
+        break;
+      case "notifications":
+        setNotificationsOpen(true);
+        break;
+      case "meetings":
+        setMeetingsOpen(true);
+        break;
+      case "availability":
+        setAvailabilityOpen(true);
+        break;
+      case "documents":
+        setDocumentsOpen(true);
+        break;
+      case "settings":
+        setSettingsOpen(true);
+        break;
+      case "support":
+        setSupportOpen(true);
+        break;
+      case "logout":
+        Alert.alert(
+          "Abmelden",
+          "Möchtest du dich wirklich abmelden?",
+          [
+            { text: "Abbrechen", style: "cancel" },
+            {
+              text: "Abmelden",
+              style: "destructive",
+              onPress: () => {
+                Alert.alert("Abgemeldet", "Du wurdest erfolgreich abgemeldet.");
+              },
             },
-          },
-        ]
-      );
-    } else {
-      Alert.alert("Bald verfügbar", "Dieser Bereich wird in Kürze freigeschaltet.");
+          ]
+        );
+        break;
     }
   };
 
@@ -113,18 +149,17 @@ export default function MehrScreen() {
               <Text
                 style={[
                   styles.profileDept,
-                  { color: colors.mutedForeground, fontFamily: "Inter_400Regular" },
+                  {
+                    color: colors.mutedForeground,
+                    fontFamily: "Inter_400Regular",
+                  },
                 ]}
               >
                 {user.department}
               </Text>
             </View>
             <View style={styles.profileEdit}>
-              <Feather
-                name="edit-2"
-                size={16}
-                color={colors.mutedForeground}
-              />
+              <Feather name="edit-2" size={16} color={colors.mutedForeground} />
             </View>
           </View>
         </TouchableOpacity>
@@ -133,19 +168,34 @@ export default function MehrScreen() {
           <View
             style={[
               styles.infoChip,
-              { backgroundColor: colors.success + "18", borderRadius: 10 },
+              {
+                backgroundColor: isCheckedIn
+                  ? colors.success + "18"
+                  : colors.muted,
+                borderRadius: 10,
+              },
             ]}
           >
             <View
-              style={[styles.statusDot, { backgroundColor: colors.success }]}
+              style={[
+                styles.statusDot,
+                {
+                  backgroundColor: isCheckedIn
+                    ? colors.success
+                    : colors.mutedForeground,
+                },
+              ]}
             />
             <Text
               style={[
                 styles.infoChipText,
-                { color: colors.success, fontFamily: "Inter_500Medium" },
+                {
+                  color: isCheckedIn ? colors.success : colors.mutedForeground,
+                  fontFamily: "Inter_500Medium",
+                },
               ]}
             >
-              Eingestempelt
+              {isCheckedIn ? "Eingestempelt" : "Ausgestempelt"}
             </Text>
           </View>
           <View
@@ -162,7 +212,10 @@ export default function MehrScreen() {
             <Text
               style={[
                 styles.infoChipText,
-                { color: colors.mutedForeground, fontFamily: "Inter_400Regular" },
+                {
+                  color: colors.mutedForeground,
+                  fontFamily: "Inter_400Regular",
+                },
               ]}
             >
               Seit {user.joinedAt.split("-")[0]}
@@ -207,6 +260,36 @@ export default function MehrScreen() {
           Alte Zimmerei Staff App · v1.0.0
         </Text>
       </ScrollView>
+
+      <ProfileModal
+        visible={profileOpen}
+        onClose={() => setProfileOpen(false)}
+        user={user}
+      />
+      <NotificationsModal
+        visible={notificationsOpen}
+        onClose={() => setNotificationsOpen(false)}
+      />
+      <MeetingsModal
+        visible={meetingsOpen}
+        onClose={() => setMeetingsOpen(false)}
+      />
+      <UnavailabilityModal
+        visible={availabilityOpen}
+        onClose={() => setAvailabilityOpen(false)}
+      />
+      <DocumentsModal
+        visible={documentsOpen}
+        onClose={() => setDocumentsOpen(false)}
+      />
+      <SettingsModal
+        visible={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+      />
+      <SupportModal
+        visible={supportOpen}
+        onClose={() => setSupportOpen(false)}
+      />
     </View>
   );
 }
