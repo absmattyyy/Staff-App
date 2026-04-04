@@ -103,11 +103,6 @@ export default function DienstplanScreen() {
           Dienstplan
         </Text>
         <View style={styles.headerRight}>
-          <Text
-            style={[styles.monthLabel, { color: colors.mutedForeground, fontFamily: "Inter_500Medium" }]}
-          >
-            April 2026
-          </Text>
           {user.isAdmin ? (
             <TouchableOpacity
               activeOpacity={0.7}
@@ -170,6 +165,11 @@ export default function DienstplanScreen() {
           { backgroundColor: colors.headerBackground, borderBottomColor: colors.border },
         ]}
       >
+        <Text
+          style={[styles.monthLabel, { color: colors.mutedForeground, fontFamily: "Inter_500Medium" }]}
+        >
+          April 2026
+        </Text>
         <SegmentControl
           options={[
             { label: "Mein Dienstplan", value: "mine" as PlanTab },
@@ -289,17 +289,6 @@ export default function DienstplanScreen() {
             <Text style={[styles.emptyText, { color: colors.mutedForeground, fontFamily: "Inter_400Regular" }]}>
               Keine Schichten an diesem Tag
             </Text>
-            {user.isAdmin && (
-              <TouchableOpacity
-                onPress={() => setShowCreateEvent(true)}
-                style={[styles.createFromEmptyBtn, { borderColor: colors.primary, backgroundColor: colors.primary + "10" }]}
-              >
-                <Feather name="plus" size={13} color={colors.primary} />
-                <Text style={[styles.createFromEmptyText, { color: colors.primary, fontFamily: "Inter_500Medium" }]}>
-                  Event erstellen
-                </Text>
-              </TouchableOpacity>
-            )}
           </View>
         ) : (
           dayShifts.map((shift) => (
@@ -377,7 +366,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 10,
   },
-  monthLabel: { fontSize: 14 },
   addBtn: {
     flexDirection: "row",
     alignItems: "center",
@@ -412,8 +400,14 @@ const styles = StyleSheet.create({
   changeBannerSub: { fontSize: 12 },
   segmentWrapper: {
     paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingTop: 8,
+    paddingBottom: 10,
     borderBottomWidth: StyleSheet.hairlineWidth,
+    gap: 6,
+  },
+  monthLabel: {
+    fontSize: 13,
+    textAlign: "center",
   },
   calendarRow: {
     borderBottomWidth: StyleSheet.hairlineWidth,
@@ -455,17 +449,6 @@ const styles = StyleSheet.create({
     padding: 28,
   },
   emptyText: { fontSize: 14 },
-  createFromEmptyBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    borderWidth: 1,
-    borderRadius: 20,
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    marginTop: 4,
-  },
-  createFromEmptyText: { fontSize: 13 },
   unavailAdminBtn: {
     flexDirection: "row",
     alignItems: "center",
