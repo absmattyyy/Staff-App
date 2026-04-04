@@ -12,16 +12,14 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useColors } from "@/hooks/useColors";
 
-const TAB_HEIGHT = 60;
-const CENTER_BTN_SIZE = 60;
-const CENTER_LIFT = 14;
+const CENTER_BTN_SIZE = 62;
+const TAB_CONTENT_HEIGHT = 58;
 
 export default function TabLayout() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const isWeb = Platform.OS === "web";
   const bottomInset = isWeb ? 34 : insets.bottom;
-  const tabBarHeight = TAB_HEIGHT + bottomInset;
 
   return (
     <Tabs
@@ -30,7 +28,6 @@ export default function TabLayout() {
           {...props}
           colors={colors}
           bottomInset={bottomInset}
-          tabBarHeight={tabBarHeight}
         />
       )}
       screenOptions={{ headerShown: false }}
@@ -46,13 +43,7 @@ export default function TabLayout() {
   );
 }
 
-function CustomTabBar({
-  state,
-  navigation,
-  colors,
-  bottomInset,
-  tabBarHeight,
-}: any) {
+function CustomTabBar({ state, navigation, colors, bottomInset }: any) {
   const routes = state.routes.filter((r: any) => r.name !== "index");
   const currentRouteName = state.routes[state.index]?.name;
 
@@ -70,6 +61,9 @@ function CustomTabBar({
     mehr: "Mehr",
   };
 
+  // Total tab bar height: content area + bottom safe area inset
+  const totalHeight = TAB_CONTENT_HEIGHT + bottomInset;
+
   return (
     <View
       style={[
@@ -77,7 +71,7 @@ function CustomTabBar({
         {
           backgroundColor: colors.tabBar,
           borderTopColor: colors.tabBarBorder,
-          height: tabBarHeight,
+          height: totalHeight,
           paddingBottom: bottomInset,
         },
       ]}
@@ -100,26 +94,29 @@ function CustomTabBar({
         if (isCenter) {
           return (
             <View key={route.key} style={styles.centerWrapper}>
-              <TouchableOpacity
-                onPress={onPress}
-                activeOpacity={0.85}
-                style={[
-                  styles.centerButton,
-                  {
-                    width: CENTER_BTN_SIZE,
-                    height: CENTER_BTN_SIZE,
-                    borderRadius: CENTER_BTN_SIZE / 2,
-                    backgroundColor: colors.primary,
-                    marginTop: -CENTER_LIFT,
-                  },
-                ]}
-              >
-                <Feather
-                  name="clock"
-                  size={26}
-                  color={colors.primaryForeground}
-                />
-              </TouchableOpacity>
+              {/* Button lifted above the tab bar border */}
+              <View style={styles.centerButtonContainer}>
+                <TouchableOpacity
+                  onPress={onPress}
+                  activeOpacity={0.85}
+                  style={[
+                    styles.centerButton,
+                    {
+                      width: CENTER_BTN_SIZE,
+                      height: CENTER_BTN_SIZE,
+                      borderRadius: CENTER_BTN_SIZE / 2,
+                      backgroundColor: colors.primary,
+                    },
+                  ]}
+                >
+                  <Feather
+                    name="clock"
+                    size={26}
+                    color={colors.primaryForeground}
+                  />
+                </TouchableOpacity>
+              </View>
+              {/* Label always stays in the bottom portion of the bar */}
               <Text
                 style={[
                   styles.centerLabel,
@@ -130,6 +127,8 @@ function CustomTabBar({
                       : "Inter_400Regular",
                   },
                 ]}
+                numberOfLines={1}
+                adjustsFontSizeToFit
               >
                 Zeiterfassung
               </Text>
@@ -173,7 +172,7 @@ function CustomTabBar({
 const styles = StyleSheet.create({
   tabBar: {
     flexDirection: "row",
-    alignItems: "flex-end",
+    alignItems: "stretch",
     borderTopWidth: StyleSheet.hairlineWidth,
     overflow: "visible",
   },
@@ -192,18 +191,28 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "flex-end",
     paddingBottom: 8,
-    gap: 4,
+    overflow: "visible",
+  },
+  centerButtonContainer: {
+    position: "absolute",
+    // Center the button so it straddles the top border of the tab bar:
+    // button is CENTER_BTN_SIZE tall, we want it centered on the top border
+    // top border is at y=0 of the tab bar, so top = -(CENTER_BTN_SIZE / 2 - 4)
+    top: -(CENTER_BTN_SIZE / 2 - 4),
+    alignItems: "center",
   },
   centerButton: {
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#E89F3F",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.45,
+    shadowRadius: 10,
     elevation: 8,
   },
   centerLabel: {
     fontSize: 10,
+    minWidth: 80,
+    textAlign: "center",
   },
 });
