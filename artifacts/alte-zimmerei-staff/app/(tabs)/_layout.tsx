@@ -13,8 +13,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 
 const TAB_HEIGHT = 60;
-const CENTER_BTN_SIZE = 64;
-const CENTER_BTN_OFFSET = 20;
+const CENTER_BTN_SIZE = 60;
+const CENTER_LIFT = 14;
 
 export default function TabLayout() {
   const colors = useColors();
@@ -25,10 +25,15 @@ export default function TabLayout() {
 
   return (
     <Tabs
-      tabBar={(props) => <CustomTabBar {...props} colors={colors} bottomInset={bottomInset} tabBarHeight={tabBarHeight} />}
-      screenOptions={{
-        headerShown: false,
-      }}
+      tabBar={(props) => (
+        <CustomTabBar
+          {...props}
+          colors={colors}
+          bottomInset={bottomInset}
+          tabBarHeight={tabBarHeight}
+        />
+      )}
+      screenOptions={{ headerShown: false }}
       initialRouteName="feed"
     >
       <Tabs.Screen name="index" options={{ href: null }} />
@@ -51,19 +56,18 @@ function CustomTabBar({
   const routes = state.routes.filter((r: any) => r.name !== "index");
   const currentRouteName = state.routes[state.index]?.name;
 
-  const getIcon = (name: string, focused: boolean, index: number) => {
-    const color = focused ? colors.tabActive : colors.tabInactive;
-    const icons: Record<string, string> = {
-      feed: "rss",
-      dienstplan: "calendar",
-      zeiterfassung: "clock",
-      tausch: "repeat",
-      mehr: "menu",
-    };
-    const iconName = icons[name] ?? "circle";
+  const ICONS: Record<string, string> = {
+    feed: "rss",
+    dienstplan: "calendar",
+    tausch: "repeat",
+    mehr: "menu",
+  };
 
-    if (index === 2) return null;
-    return <Feather name={iconName as any} size={22} color={color} />;
+  const LABELS: Record<string, string> = {
+    feed: "Feed",
+    dienstplan: "Dienstplan",
+    tausch: "Tausch",
+    mehr: "Mehr",
   };
 
   return (
@@ -95,28 +99,25 @@ function CustomTabBar({
 
         if (isCenter) {
           return (
-            <View key={route.key} style={styles.centerTabWrapper}>
+            <View key={route.key} style={styles.centerWrapper}>
               <TouchableOpacity
                 onPress={onPress}
                 activeOpacity={0.85}
                 style={[
                   styles.centerButton,
                   {
-                    backgroundColor: focused
-                      ? colors.primary
-                      : colors.tabBar,
-                    borderColor: focused ? colors.primary : colors.border,
                     width: CENTER_BTN_SIZE,
                     height: CENTER_BTN_SIZE,
                     borderRadius: CENTER_BTN_SIZE / 2,
-                    bottom: CENTER_BTN_OFFSET + bottomInset,
+                    backgroundColor: colors.primary,
+                    marginTop: -CENTER_LIFT,
                   },
                 ]}
               >
                 <Feather
                   name="clock"
                   size={26}
-                  color={focused ? colors.primaryForeground : colors.primary}
+                  color={colors.primaryForeground}
                 />
               </TouchableOpacity>
               <Text
@@ -130,7 +131,7 @@ function CustomTabBar({
                   },
                 ]}
               >
-                Zeit
+                Zeiterfassung
               </Text>
             </View>
           );
@@ -143,7 +144,11 @@ function CustomTabBar({
             activeOpacity={0.7}
             style={styles.tab}
           >
-            {getIcon(route.name, focused, index)}
+            <Feather
+              name={ICONS[route.name] as any}
+              size={22}
+              color={focused ? colors.tabActive : colors.tabInactive}
+            />
             <Text
               style={[
                 styles.label,
@@ -156,13 +161,7 @@ function CustomTabBar({
               ]}
               numberOfLines={1}
             >
-              {route.name === "dienstplan"
-                ? "Dienst"
-                : route.name === "mehr"
-                ? "Mehr"
-                : route.name === "feed"
-                ? "Feed"
-                : "Tausch"}
+              {LABELS[route.name] ?? route.name}
             </Text>
           </TouchableOpacity>
         );
@@ -174,39 +173,37 @@ function CustomTabBar({
 const styles = StyleSheet.create({
   tabBar: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-end",
     borderTopWidth: StyleSheet.hairlineWidth,
+    overflow: "visible",
   },
   tab: {
     flex: 1,
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "flex-end",
+    paddingBottom: 10,
     gap: 4,
-    paddingTop: 8,
   },
   label: {
     fontSize: 10,
   },
-  centerTabWrapper: {
+  centerWrapper: {
     flex: 1,
     alignItems: "center",
     justifyContent: "flex-end",
-    paddingBottom: 6,
-    gap: 0,
+    paddingBottom: 8,
+    gap: 4,
   },
   centerButton: {
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 2,
     shadowColor: "#E89F3F",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
     elevation: 8,
-    position: "absolute",
   },
   centerLabel: {
     fontSize: 10,
-    marginTop: 2,
   },
 });
