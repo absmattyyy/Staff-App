@@ -10,24 +10,11 @@ import {
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
-import { Avatar } from "@/components/ui/Avatar";
 import { useDienstplan } from "@/context/DienstplanContext";
 
 interface MeetingsModalProps {
   visible: boolean;
   onClose: () => void;
-}
-
-const WEEKDAYS = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
-
-function formatEventDate(dateStr: string): string {
-  const d = new Date(dateStr + "T00:00:00");
-  return d.toLocaleDateString("de-DE", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
 }
 
 function getRelativeDay(dateStr: string): string {
