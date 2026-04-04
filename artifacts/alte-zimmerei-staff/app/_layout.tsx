@@ -17,6 +17,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AppProvider } from "@/context/AppContext";
 import { FeedProvider } from "@/context/FeedContext";
 import { DienstplanProvider } from "@/context/DienstplanContext";
+import { SwapProvider } from "@/context/SwapContext";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -55,7 +56,9 @@ export default function RootLayout() {
               <AppProvider>
                 <FeedProvider>
                   <DienstplanProvider>
-                    <RootLayoutNav />
+                    <SwapProvider>
+                      <RootLayoutNav />
+                    </SwapProvider>
                   </DienstplanProvider>
                 </FeedProvider>
               </AppProvider>

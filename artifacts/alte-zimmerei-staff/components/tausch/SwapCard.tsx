@@ -11,6 +11,8 @@ import type { SwapRequest } from "@/types";
 interface SwapCardProps {
   swap: SwapRequest;
   onTakeOver?: (id: string) => void;
+  onApprove?: (id: string) => void;
+  onReject?: (id: string) => void;
 }
 
 function formatDate(dateStr: string): string {
@@ -22,7 +24,12 @@ function formatDate(dateStr: string): string {
   });
 }
 
-export function SwapCard({ swap, onTakeOver }: SwapCardProps) {
+export function SwapCard({
+  swap,
+  onTakeOver,
+  onApprove,
+  onReject,
+}: SwapCardProps) {
   const colors = useColors();
 
   const handleTakeOver = () => {
@@ -30,7 +37,18 @@ export function SwapCard({ swap, onTakeOver }: SwapCardProps) {
     onTakeOver?.(swap.id);
   };
 
+  const handleApprove = () => {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    onApprove?.(swap.id);
+  };
+
+  const handleReject = () => {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    onReject?.(swap.id);
+  };
+
   const isActive = swap.status === "open" || swap.status === "pending";
+  const showOwnerApproval = swap.isOwn && swap.status === "pending";
 
   return (
     <View
@@ -43,6 +61,8 @@ export function SwapCard({ swap, onTakeOver }: SwapCardProps) {
               ? colors.success + "44"
               : swap.status === "rejected"
               ? colors.destructive + "33"
+              : swap.status === "pending" && swap.isOwn
+              ? colors.warning + "55"
               : colors.border,
           borderRadius: 12,
           opacity: swap.status === "rejected" ? 0.7 : 1,
@@ -101,7 +121,10 @@ export function SwapCard({ swap, onTakeOver }: SwapCardProps) {
           <Text
             style={[
               styles.shiftText,
-              { color: colors.mutedForeground, fontFamily: "Inter_400Regular" },
+              {
+                color: colors.mutedForeground,
+                fontFamily: "Inter_400Regular",
+              },
             ]}
           >
             {swap.shift.startTime} – {swap.shift.endTime}
@@ -112,11 +135,28 @@ export function SwapCard({ swap, onTakeOver }: SwapCardProps) {
           <Text
             style={[
               styles.shiftText,
-              { color: colors.mutedForeground, fontFamily: "Inter_400Regular" },
+              {
+                color: colors.mutedForeground,
+                fontFamily: "Inter_400Regular",
+              },
             ]}
             numberOfLines={1}
           >
             {swap.shift.eventName} · {swap.shift.location}
+          </Text>
+        </View>
+        <View style={styles.shiftRow}>
+          <Feather name="user" size={13} color={colors.mutedForeground} />
+          <Text
+            style={[
+              styles.shiftText,
+              {
+                color: colors.mutedForeground,
+                fontFamily: "Inter_400Regular",
+              },
+            ]}
+          >
+            {swap.shift.role}
           </Text>
         </View>
       </View>
@@ -137,7 +177,81 @@ export function SwapCard({ swap, onTakeOver }: SwapCardProps) {
         </Text>
       )}
 
-      {!swap.isOwn && isActive && onTakeOver && (
+      {showOwnerApproval && (
+        <View
+          style={[
+            styles.approvalBox,
+            {
+              backgroundColor: colors.warning + "15",
+              borderColor: colors.warning + "44",
+              borderRadius: 10,
+            },
+          ]}
+        >
+          <View style={styles.approvalInfo}>
+            <Feather name="user-check" size={14} color={colors.warning} />
+            <Text
+              style={[
+                styles.approvalText,
+                { color: colors.warning, fontFamily: "Inter_500Medium" },
+              ]}
+            >
+              Ein Kollege bietet Übernahme an – warte auf Besitzer-Genehmigung
+            </Text>
+          </View>
+          <View style={styles.approvalBtns}>
+            <TouchableOpacity
+              onPress={handleApprove}
+              activeOpacity={0.8}
+              style={[
+                styles.approveBtn,
+                {
+                  backgroundColor: colors.success + "20",
+                  borderColor: colors.success + "55",
+                  borderRadius: 8,
+                },
+              ]}
+            >
+              <Feather name="check" size={14} color={colors.success} />
+              <Text
+                style={[
+                  styles.approveBtnText,
+                  { color: colors.success, fontFamily: "Inter_600SemiBold" },
+                ]}
+              >
+                Genehmigen
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleReject}
+              activeOpacity={0.8}
+              style={[
+                styles.rejectBtn,
+                {
+                  backgroundColor: colors.destructive + "15",
+                  borderColor: colors.destructive + "44",
+                  borderRadius: 8,
+                },
+              ]}
+            >
+              <Feather name="x" size={14} color={colors.destructive} />
+              <Text
+                style={[
+                  styles.rejectBtnText,
+                  {
+                    color: colors.destructive,
+                    fontFamily: "Inter_600SemiBold",
+                  },
+                ]}
+              >
+                Ablehnen
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+
+      {!swap.isOwn && swap.status === "open" && onTakeOver && (
         <PrimaryButton
           label="Schicht übernehmen"
           onPress={handleTakeOver}
@@ -188,5 +302,48 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 18,
     padding: 10,
+  },
+  approvalBox: {
+    borderWidth: 1,
+    padding: 12,
+    gap: 10,
+  },
+  approvalInfo: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 8,
+  },
+  approvalText: {
+    fontSize: 13,
+    flex: 1,
+    lineHeight: 18,
+  },
+  approvalBtns: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  approveBtn: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    borderWidth: 1,
+    paddingVertical: 8,
+  },
+  approveBtnText: {
+    fontSize: 13,
+  },
+  rejectBtn: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    borderWidth: 1,
+    paddingVertical: 8,
+  },
+  rejectBtnText: {
+    fontSize: 13,
   },
 });

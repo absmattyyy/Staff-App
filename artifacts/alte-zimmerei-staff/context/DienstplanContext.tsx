@@ -24,6 +24,7 @@ interface DienstplanContextValue {
   changedShifts: Shift[];
   dismissShiftChange: (shiftId: string) => void;
   dismissedChangeIds: Set<string>;
+  transferShift: (shiftId: string) => void;
 }
 
 const DienstplanContext = createContext<DienstplanContextValue | null>(null);
@@ -106,6 +107,12 @@ export function DienstplanProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const transferShift = useCallback((shiftId: string) => {
+    setShifts((prev) =>
+      prev.map((s) => (s.id === shiftId ? { ...s, isOwn: false } : s))
+    );
+  }, []);
+
   return (
     <DienstplanContext.Provider
       value={{
@@ -122,6 +129,7 @@ export function DienstplanProvider({ children }: { children: ReactNode }) {
         changedShifts,
         dismissShiftChange,
         dismissedChangeIds,
+        transferShift,
       }}
     >
       {children}
