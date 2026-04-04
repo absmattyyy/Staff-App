@@ -245,42 +245,6 @@ export function SupportModal({ visible, onClose }: SupportModalProps) {
               </Text>
             </TouchableOpacity>
 
-            <View
-              style={[
-                styles.contactBox,
-                {
-                  backgroundColor: colors.card,
-                  borderColor: colors.border,
-                  borderRadius: 12,
-                },
-              ]}
-            >
-              <Feather name="mail" size={16} color={colors.primary} />
-              <View style={{ flex: 1 }}>
-                <Text
-                  style={[
-                    styles.contactTitle,
-                    {
-                      color: colors.foreground,
-                      fontFamily: "Inter_600SemiBold",
-                    },
-                  ]}
-                >
-                  Direkter Kontakt
-                </Text>
-                <Text
-                  style={[
-                    styles.contactSub,
-                    {
-                      color: colors.mutedForeground,
-                      fontFamily: "Inter_400Regular",
-                    },
-                  ]}
-                >
-                  support@alte-zimmerei.de
-                </Text>
-              </View>
-            </View>
             <View style={{ height: 40 }} />
           </ScrollView>
         </View>
@@ -340,13 +304,4 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   submitBtnText: { fontSize: 15 },
-  contactBox: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    borderWidth: StyleSheet.hairlineWidth,
-    padding: 14,
-  },
-  contactTitle: { fontSize: 14 },
-  contactSub: { fontSize: 13 },
 });
