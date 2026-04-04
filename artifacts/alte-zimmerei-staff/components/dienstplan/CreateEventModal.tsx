@@ -21,11 +21,36 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
 import { useColors } from "@/hooks/useColors";
 import { useDienstplan } from "@/context/DienstplanContext";
-import type { EventStaffMember } from "@/types";
+import type { Event, EventStaffMember } from "@/types";
 
 interface CreateEventModalProps {
   visible: boolean;
   onClose: () => void;
+  editEvent?: Event | null;
+}
+
+// Map label → key for pre-filling staff from an existing event
+const ROLE_LABEL_TO_KEY: Record<string, RoleKey> = {
+  Bar: "bar",
+  Springer: "springer",
+  Kasse: "kasse",
+  Garderobe: "garderobe",
+  Security: "security",
+};
+
+function nearestMinute(min: string): string {
+  const n = parseInt(min, 10);
+  const rounded = Math.round(n / 5) * 5;
+  return String(Math.min(55, rounded)).padStart(2, "0");
+}
+
+function parseAssignment(staff: EventStaffMember[]): StaffAssignment {
+  const result: StaffAssignment = { bar: [], springer: [], kasse: [], garderobe: [], security: [] };
+  for (const s of staff) {
+    const key = ROLE_LABEL_TO_KEY[s.role];
+    if (key) result[key].push({ id: s.id, name: s.name });
+  }
+  return result;
 }
 
 // ─── Staff pool ───────────────────────────────────────────────────────────────
@@ -452,23 +477,48 @@ const staffStyles = StyleSheet.create({
 // ─── Main Modal ───────────────────────────────────────────────────────────────
 const EMPTY_ASSIGNMENT: StaffAssignment = { bar: [], springer: [], kasse: [], garderobe: [], security: [] };
 
-export function CreateEventModal({ visible, onClose }: CreateEventModalProps) {
+export function CreateEventModal({ visible, onClose, editEvent }: CreateEventModalProps) {
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const { addEvent } = useDienstplan();
+  const { addEvent, updateEvent: updateEventCtx } = useDienstplan();
+  const isEditing = !!editEvent;
 
-  const [name, setName] = useState("");
-  const [selectedDay, setSelectedDay] = useState<number | null>(null);
-  const [startHour, setStartHour] = useState("20");
-  const [startMin, setStartMin] = useState("00");
-  const [endHour, setEndHour] = useState("04");
-  const [endMin, setEndMin] = useState("00");
-  const [description, setDescription] = useState("");
+  const initDay = editEvent ? parseInt(editEvent.date.split("-")[2], 10) : null;
+  const initStartH = editEvent ? editEvent.startTime.split(":")[0] : "20";
+  const initStartM = editEvent ? nearestMinute(editEvent.startTime.split(":")[1] ?? "00") : "00";
+  const initEndH = editEvent ? editEvent.endTime.split(":")[0] : "04";
+  const initEndM = editEvent ? nearestMinute(editEvent.endTime.split(":")[1] ?? "00") : "00";
+
+  const [name, setName] = useState(editEvent?.name ?? "");
+  const [selectedDay, setSelectedDay] = useState<number | null>(initDay);
+  const [startHour, setStartHour] = useState(initStartH);
+  const [startMin, setStartMin] = useState(initStartM);
+  const [endHour, setEndHour] = useState(initEndH);
+  const [endMin, setEndMin] = useState(initEndM);
+  const [description, setDescription] = useState(editEvent?.description ?? "");
   const [djInput, setDjInput] = useState("");
-  const [djs, setDjs] = useState<string[]>([]);
-  const [assignment, setAssignment] = useState<StaffAssignment>(EMPTY_ASSIGNMENT);
-  const [flyerUri, setFlyerUri] = useState<string | null>(null);
+  const [djs, setDjs] = useState<string[]>(editEvent?.djs ?? []);
+  const [assignment, setAssignment] = useState<StaffAssignment>(
+    editEvent ? parseAssignment(editEvent.staff) : EMPTY_ASSIGNMENT
+  );
+  const [flyerUri, setFlyerUri] = useState<string | null>(editEvent?.flyerUri ?? null);
   const [loading, setLoading] = useState(false);
+
+  // Re-initialise whenever the editEvent changes (modal re-opens for a different event)
+  React.useEffect(() => {
+    if (visible) {
+      setName(editEvent?.name ?? "");
+      setSelectedDay(editEvent ? parseInt(editEvent.date.split("-")[2], 10) : null);
+      setStartHour(editEvent ? editEvent.startTime.split(":")[0] : "20");
+      setStartMin(editEvent ? nearestMinute(editEvent.startTime.split(":")[1] ?? "00") : "00");
+      setEndHour(editEvent ? editEvent.endTime.split(":")[0] : "04");
+      setEndMin(editEvent ? nearestMinute(editEvent.endTime.split(":")[1] ?? "00") : "00");
+      setDescription(editEvent?.description ?? "");
+      setDjs(editEvent?.djs ?? []);
+      setAssignment(editEvent ? parseAssignment(editEvent.staff) : EMPTY_ASSIGNMENT);
+      setFlyerUri(editEvent?.flyerUri ?? null);
+    }
+  }, [visible, editEvent?.id]);
 
   const canCreate = name.trim().length > 0 && selectedDay !== null;
 
@@ -508,17 +558,21 @@ export function CreateEventModal({ visible, onClose }: CreateEventModalProps) {
     setLoading(true);
     const dateStr = `2026-04-${String(selectedDay).padStart(2, "0")}`;
     await new Promise((r) => setTimeout(r, 400));
-    addEvent({
+    const payload = {
       name: name.trim(),
       date: dateStr,
       startTime: `${startHour}:${startMin}`,
       endTime: `${endHour}:${endMin}`,
-      location: "",
       description: description.trim() || undefined,
       djs,
       staff: buildStaffList(),
       flyerUri: flyerUri ?? undefined,
-    });
+    };
+    if (isEditing && editEvent) {
+      updateEventCtx(editEvent.id, payload);
+    } else {
+      addEvent({ ...payload, location: "" });
+    }
     setLoading(false);
     handleClose();
   };
@@ -563,7 +617,7 @@ export function CreateEventModal({ visible, onClose }: CreateEventModalProps) {
               </Text>
             </TouchableOpacity>
             <Text style={[styles.title, { color: colors.foreground, fontFamily: "Inter_600SemiBold" }]}>
-              Event erstellen
+              {isEditing ? "Event bearbeiten" : "Event erstellen"}
             </Text>
             <TouchableOpacity
               onPress={handleCreate}
@@ -574,7 +628,7 @@ export function CreateEventModal({ visible, onClose }: CreateEventModalProps) {
                 <ActivityIndicator size="small" color={colors.primaryForeground} />
               ) : (
                 <Text style={[styles.createBtnText, { color: colors.primaryForeground, fontFamily: "Inter_600SemiBold" }]}>
-                  Erstellen
+                  {isEditing ? "Speichern" : "Erstellen"}
                 </Text>
               )}
             </TouchableOpacity>

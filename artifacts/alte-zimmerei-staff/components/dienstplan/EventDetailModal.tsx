@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -17,6 +17,7 @@ import { Avatar } from "@/components/ui/Avatar";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { useDienstplan } from "@/context/DienstplanContext";
 import { useAppContext } from "@/context/AppContext";
+import { CreateEventModal } from "@/components/dienstplan/CreateEventModal";
 import type { Event } from "@/types";
 
 interface EventDetailModalProps {
@@ -29,6 +30,7 @@ export function EventDetailModal({ event, onClose }: EventDetailModalProps) {
   const insets = useSafeAreaInsets();
   const { deleteEvent } = useDienstplan();
   const { user } = useAppContext();
+  const [editOpen, setEditOpen] = useState(false);
 
   if (!event) return null;
 
@@ -65,6 +67,7 @@ export function EventDetailModal({ event, onClose }: EventDetailModalProps) {
   };
 
   return (
+    <>
     <Modal
       visible={!!event}
       animationType="slide"
@@ -89,9 +92,14 @@ export function EventDetailModal({ event, onClose }: EventDetailModalProps) {
             Event-Details
           </Text>
           {user.isAdmin ? (
-            <TouchableOpacity onPress={handleDeleteEvent} activeOpacity={0.7} style={styles.deleteBtn}>
-              <Feather name="trash-2" size={18} color={colors.destructive} />
-            </TouchableOpacity>
+            <View style={styles.adminActions}>
+              <TouchableOpacity onPress={() => setEditOpen(true)} activeOpacity={0.7} style={styles.actionBtn}>
+                <Feather name="edit-2" size={17} color={colors.primary} />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleDeleteEvent} activeOpacity={0.7} style={styles.actionBtn}>
+                <Feather name="trash-2" size={17} color={colors.destructive} />
+              </TouchableOpacity>
+            </View>
           ) : (
             <View style={styles.closeBtn} />
           )}
@@ -232,6 +240,15 @@ export function EventDetailModal({ event, onClose }: EventDetailModalProps) {
         </ScrollView>
       </View>
     </Modal>
+
+    {user.isAdmin && (
+      <CreateEventModal
+        visible={editOpen}
+        onClose={() => setEditOpen(false)}
+        editEvent={event}
+      />
+    )}
+  </>
   );
 }
 
@@ -246,7 +263,8 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   closeBtn: { width: 36, alignItems: "flex-start" },
-  deleteBtn: { width: 36, alignItems: "flex-end" },
+  adminActions: { flexDirection: "row", alignItems: "center", gap: 4 },
+  actionBtn: { padding: 8 },
   headerTitle: { fontSize: 16, flex: 1, textAlign: "center" },
   scroll: { flex: 1 },
   scrollContent: { padding: 16, gap: 12 },
