@@ -118,7 +118,7 @@ export interface Event {
   date: string;
   startTime: string;
   endTime: string;
-  location: string;
+  location?: string;
   description?: string;
   djs: string[];
   staff: EventStaffMember[];

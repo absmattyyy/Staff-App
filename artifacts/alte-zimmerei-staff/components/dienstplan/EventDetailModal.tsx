@@ -151,12 +151,14 @@ export function EventDetailModal({ event, onClose }: EventDetailModalProps) {
                 {event.startTime} – {event.endTime} Uhr
               </Text>
             </View>
-            <View style={[styles.chip, { backgroundColor: colors.muted, borderColor: colors.border }]}>
-              <Feather name="map-pin" size={13} color={colors.primary} />
-              <Text style={[styles.chipText, { color: colors.foreground, fontFamily: "Inter_500Medium" }]}>
-                {event.location}
-              </Text>
-            </View>
+            {!!event.location && (
+              <View style={[styles.chip, { backgroundColor: colors.muted, borderColor: colors.border }]}>
+                <Feather name="map-pin" size={13} color={colors.primary} />
+                <Text style={[styles.chipText, { color: colors.foreground, fontFamily: "Inter_500Medium" }]}>
+                  {event.location}
+                </Text>
+              </View>
+            )}
           </View>
 
           {/* Description */}
