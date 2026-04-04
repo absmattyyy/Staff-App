@@ -1,0 +1,98 @@
+## 1. Projektübersicht 
+- **Projektname:** Alte Zimmerei Staff App
+- **Projekttyp:** Mobile App (iOS & Android)
+- **Einführung:** Dieses Projekt, namens 'Alte Zimmerei Staff App', ist eine mobile App, welche darauf abzielt, die Schichten für die Mitarbeiter der Alten Zimmerei übersichtlicher zu machen, schneller zu informieren uvm. 
+
+--- 
+
+## 2. Projektbeschreibung
+### Design
+- **Theme**: Dark Mode
+- **Akzentfarbe**: #E89F3F (Orange)
+- **Schriftarten**: System-Fonts (iOS: SF Pro, Android: Roboto)
+- **Animationen**: Dezent (Fade-ins, sanfte Übergänge)
+- **Navigation**: Tab-Bar unten mit animierten Icons
+
+### Benutzerprofile und Zugriffsverwaltung
+* Registrierung: E-Mail, Name, Passwort, (optional) Telefonnummer
+* Profilbearbeitung: Mitarbeiter können ihr Profil selbst bearbeiten
+* Passwortverwaltung: Änderung und E-Mail-basiertes Zurücksetzen
+* Benutzerrollen:
+    * Besitzer/Admin:
+        * Manuelle Festlegung initialer Besitzer
+        * Admin-Zugriff auf speziellen Bereich
+        * Posting-Rechte im Neuigkeiten-Feed
+        * Posts anpinnen, editieren/löschen (auch von Mitarbeitern)
+        * Mitarbeiter aus der App entfernen
+        * Zugriff auf Statistik-Dashboard
+    * Mitarbeiter:
+        * Posting-Rechte im Allgemein-Feed
+        * Kommentieren und Reagieren in beiden Feeds
+        * Eigene Posts bearbeiten/löschen
+
+### Neuigkeiten-Feed (nur Besitzer können posten)
+* Posts mit Text, Bildern, Videos
+* Markierung wichtiger Posts mit "!"-Symbol und Benachrichtigungen
+* Abstimmungsfunktion mit anpassbaren Optionen und Zeitlimit
+* Pin-Funktion für wichtige Beiträge
+* Kategorisierung mit Tags
+* Archivierung und Suche
+
+### Allgemein-Feed (alle Mitarbeiter können posten)
+* Posts mit Text, Bildern, Videos
+* Kommentare und Emoji-Reaktionen
+* Kategorisierung/Tags
+* Archivierung und Suche
+
+### Dienstwechsel-Funktion
+* Kalender-Ansicht mit eigenen Schichten
+* Anfragen mit Datum, Event-Name, Dienst und optionalem Grund
+* Übernahme-Angebote von anderen Mitarbeitern
+* Genehmigung durch Besitzer erforderlich
+* Automatische Aktualisierung des Dienstplans nach Bestätigung
+
+### Team-Besprechungen
+* Anzeige des nächsten Termins
+* Zu-/Absage-Funktion mit optionaler Begründung
+* Übersicht der Teilnehmer für Besitzer
+* Kalender-Integration (Export in Gerätekalender)
+* Protokolle vergangener Besprechungen (von Besitzern erstellbar)
+
+### Dienst- & Eventplan
+* Ansichten:
+    * Allgemeiner Monatsplan
+    * Persönlicher Dienstplan
+    * Event-Details (Name, DJs, Personal)
+    * Flyer-Download
+* Verwaltung:
+    * Manuelle Eingabe durch Besitzer
+    * Mitarbeiter können Nicht-Verfügbarkeiten angeben
+* Benachrichtigungen bei Änderungen des persönlichen Dienstplans
+
+### Integrierte Checklisten
+* Event-Vorbereitungs- und Nachbereitungs-Checklisten
+* Zuweisbare Aufgaben mit Verantwortlichen
+* Fortschrittsverfolgung und Statusaktualisierungen
+* Vorlagen für wiederkehrende Event-Typen
+* Benachrichtigungen für ausstehende Aufgaben
+
+### Statistik-Dashboard für Besitzer
+* Übersicht über Arbeitszeiten und Mitarbeiteranwesenheit
+* Exportfunktion für Daten (CSV/Excel)
+* Visuelle Darstellung durch Diagramme und Grafiken
+
+### Zeiterfassung
+* Ein- und Ausstempel-Funktion
+* Nachträgliche Eingabe möglich
+* Genehmigungsprozess durch Besitzer
+* Monatliche Übersicht der geleisteten Stunden
+
+### Fragen & Feedback
+* Privater Kommunikationskanal zwischen Mitarbeitern und Besitzern
+* Nur Absender und Besitzer sehen Inhalte
+* Antwortmöglichkeit mit Text oder Emojis
+
+### Synchronisation & Benachrichtigungen
+* Echtzeit-Synchronisation für alle relevanten Daten
+* Push- und E-Mail-Benachrichtigungen (individuell einstellbar)
+* Keine Offline-Funktionalität erforderlich

@@ -43,6 +43,7 @@ export interface Shift {
   startTime: string;
   endTime: string;
   eventName: string;
+  eventId?: string;
   role: string;
   location: string;
   status: ShiftStatus;
@@ -103,4 +104,32 @@ export interface MenuItem {
   badge?: number;
   color?: string;
   danger?: boolean;
+}
+
+export interface EventStaffMember {
+  id: string;
+  name: string;
+  role: string;
+}
+
+export interface Event {
+  id: string;
+  name: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  location: string;
+  description?: string;
+  djs: string[];
+  staff: EventStaffMember[];
+  flyerUri?: string;
+  status: "upcoming" | "ongoing" | "past" | "cancelled";
+}
+
+export interface Unavailability {
+  id: string;
+  userId: string;
+  userName: string;
+  date: string;
+  reason?: string;
 }
