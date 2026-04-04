@@ -124,6 +124,7 @@ export interface Event {
   staff: EventStaffMember[];
   flyerUri?: string;
   status: "upcoming" | "ongoing" | "past" | "cancelled";
+  protocol?: string;
 }
 
 export interface Unavailability {
