@@ -1,0 +1,328 @@
+Erstelle eine produktionsnahe Mobile App in React Native mit Expo SDK 54 für eine interne Mitarbeiter-App namens „Alte Zimmerei Staff App“.
+
+Wichtig:
+Du sollst nicht nur das UI designen, sondern eine echte, erweiterbare App-Basis erstellen. Baue also nicht nur Screens, sondern auch eine sinnvolle App-Struktur, Navigation, wiederverwendbare Komponenten, Theme-Dateien, lokale Mock-Daten und funktionale Zustände. Die App soll wie eine echte interne Mitarbeiter-App wirken, nicht wie ein Wireframe oder reines Designkonzept.
+
+TECHNISCHER RAHMEN
+- React Native mit Expo
+- Expo SDK 54
+- mobile only
+- iOS und Android
+- keine Web-App
+- keine Desktop-Ansicht
+- saubere, wartbare, erweiterbare Codebasis
+- lokale Mock-Daten statt Backend
+- so strukturieren, dass später leicht APIs ergänzt werden können
+
+ZIEL DER APP
+Die App ist für Mitarbeiter sowie Besitzer/Admins der Alten Zimmerei. Sie dient zur internen Organisation und Übersicht von:
+- Feed / News
+- Dienstplan
+- Zeiterfassung
+- Schichttausch
+- Meetings
+- Profil / Einstellungen / weitere interne Bereiche
+
+DESIGNRICHTUNG
+Die App soll:
+- modern
+- elegant
+- hochwertig
+- professionell
+- klar strukturiert
+- leicht bedienbar
+- eher premium als verspielt
+wirken.
+
+DESIGNVORGABEN
+- Dark Mode
+- Akzentfarbe: #E89F3F
+- hochwertige dunkle Flächen mit klaren Kontrasten
+- Orange nur gezielt für wichtige Aktionen, aktive States, Highlights und relevante Status
+- keine grellen Zusatzfarben
+- moderne Systemschrift
+- sehr gute Lesbarkeit
+- klare Informationshierarchie
+- weiche Ecken
+- hochwertige Cards
+- dezente hochwertige Icons
+- mobile-first
+- konsistentes Design-System über alle Screens hinweg
+
+WAS DU ERSTELLEN SOLLST
+Erstelle eine echte Expo-/React-Native-App-Struktur mit:
+- Navigation
+- Theme
+- Design Tokens
+- wiederverwendbaren Komponenten
+- lokalen Mock-Daten
+- funktionalen Hauptscreens
+- realistischen UI-States
+- sauberer Komponenten- und Dateistruktur
+
+EMPFOHLENE PROJEKTSTRUKTUR
+- app/ oder navigation/
+- screens/
+- components/
+- theme/
+- constants/
+- hooks/
+- data/ oder mock/
+- types/
+
+DEFINIERE ZENTRAL
+- Farben
+- Typografie
+- Spacing
+- Border Radius
+- Elevation / Shadows
+- Statusfarben
+- Interaktionszustände
+- Icon-Größen
+
+HAUPTNAVIGATION
+Erstelle eine hochwertige Bottom Navigation mit diesen Tabs:
+- Feed
+- Dienstplan
+- Zeiterfassung
+- Tausch
+- Mehr
+
+Besondere Anforderung:
+„Zeiterfassung“ soll mittig stehen und als größerer, kreisförmiger Center-Button hervorgehoben sein. Dieser Button soll modern, hochwertig und professionell wirken und wie die wichtigste Schnellaktion der App erscheinen, ohne verspielt zu sein.
+
+Weitere Anforderungen an die Navigation:
+- klare aktive und inaktive Zustände
+- hochwertige, dezente Icons
+- „Mehr“ mit Menü-Icon aus drei horizontalen Linien
+- direkt als echter Teil der App umsetzen, nicht isoliert darstellen
+
+COMPONENT SYSTEM
+Erstelle ein konsistentes, wiederverwendbares UI-System mit mindestens diesen Komponenten:
+- Primary Button
+- Secondary Button
+- Icon Button
+- Card
+- List Item
+- Profile Row
+- Status Badge
+- Input Field
+- Search Field
+- Segment Control / Tab Switcher
+- Bottom Navigation
+- Modal
+- Section Header
+
+ANFORDERUNGEN AN DIE KOMPONENTEN
+- direkt in React Native Expo nutzbar
+- sinnvolle Props
+- Varianten und States
+- visuell konsistent
+- Dark-Mode-kompatibel
+- produktionsnah
+- modular und wiederverwendbar
+
+SINNVOLLE STATES UND VARIANTEN
+- active
+- inactive
+- pressed
+- disabled
+- loading
+- selected
+- focused
+- error
+- success
+- empty
+- pinned
+- changed
+
+SCREENS
+
+1. FEED
+Erstelle einen hochwertigen Feed-Screen.
+
+Ziel:
+Mitarbeiter sollen News, interne Infos und allgemeine Beiträge in einer modernen, gut lesbaren Feed-Ansicht sehen.
+
+Inhalte:
+- Header mit Titel „Feed“
+- Segment Switcher zwischen „News“ und „Allgemein“
+- mehrere Post-Karten mit:
+  - Profilbild
+  - Name
+  - Rolle oder Kennzeichnung
+  - Zeitangabe
+  - Textinhalt
+  - optional Bild
+  - Reaktionen
+  - Kommentare
+
+Funktional:
+- Umschalten zwischen News und Allgemein
+- unterschiedliche Mock-Beiträge je Segment
+- wichtige Beiträge hervorheben
+- gepinnte Beiträge klar kennzeichnen
+- Beiträge mit und ohne Bild
+- Reaktionen und Kommentare als UI-Elemente
+
+Berücksichtige Beitragstypen:
+- normal
+- wichtig
+- gepinnt
+- mit Bild
+- kurzer Infopost
+- längerer interner Beitrag
+
+2. DIENSTPLAN
+Erstelle einen hochwertigen Dienstplan-Screen.
+
+Ziel:
+Mitarbeiter sollen kommende Schichten und Event-Infos schnell und übersichtlich sehen.
+
+Inhalte:
+- Header mit Titel „Dienstplan“
+- Umschalter zwischen persönlichem Dienstplan und allgemeinem Plan
+- kompakte Monatsübersicht oder Kalenderansicht
+- Schichtkarten mit:
+  - Datum
+  - Uhrzeit
+  - Event-Name
+  - Rolle / Position
+  - Ort oder Bereich
+  - Status
+
+Funktional:
+- Umschalten zwischen persönlichem und allgemeinem Plan
+- passende Schichten je Auswahl anzeigen
+- Tag in Kalenderansicht auswählbar
+- passende Schichten darunter anzeigen
+- wichtige Änderungen optisch hervorheben
+
+Statusbeispiele:
+- bestätigt
+- geändert
+- offen
+- entfällt
+
+3. ZEITERFASSUNG
+Erstelle einen hochwertigen Zeiterfassungs-Screen.
+
+Ziel:
+Mitarbeiter sollen schnell und intuitiv ein- und ausstempeln können und ihre erfassten Zeiten übersichtlich sehen.
+
+Inhalte:
+- Header mit Titel „Zeiterfassung“
+- zentrale große Ein-/Ausstempeln-Aktion
+- klarer Status:
+  - eingestempelt
+  - nicht eingestempelt
+- heutige Arbeitszeit
+- letzte Buchungen
+- kompakte Übersicht letzter Einträge
+- optional Monatsstunden als Infokarte
+
+Funktional:
+- Ein- und Ausstempeln per Hauptaktion
+- sichtbarer Statuswechsel
+- heutige Arbeitszeit anhand von Mock-Daten
+- letzte Buchungen anzeigen
+- später leicht auf echte Zeitlogik erweiterbar
+
+Mögliche Buchungstypen:
+- Einstempeln
+- Ausstempeln
+- Pausenbeginn
+- Pausenende
+
+4. TAUSCH
+Erstelle einen hochwertigen Tausch-Screen.
+
+Ziel:
+Mitarbeiter sollen eigene Schichten zum Tausch anbieten, offene Tauschanfragen sehen und deren Status verfolgen können.
+
+Inhalte:
+- Header mit Titel „Tausch“
+- gut sichtbarer CTA „Neue Anfrage erstellen“
+- Bereich „Meine Tauschanfragen“
+- Bereich „Offene Anfragen“
+- Karten/Listenelemente mit:
+  - Datum
+  - Uhrzeit
+  - Event-Name
+  - Rolle / Schicht
+  - Tauschstatus
+
+Funktional:
+- Trennung zwischen eigenen und offenen Anfragen
+- realistische Mock-Daten
+- Statusanzeigen wie:
+  - offen
+  - wartet auf Übernahme
+  - genehmigt
+  - abgelehnt
+- optionale Aktionen wie öffnen, übernehmen oder anfragen
+- klare Trennung zwischen offenen, aktiven und abgeschlossenen Vorgängen
+
+5. MEHR
+Erstelle einen hochwertigen Mehr-Screen.
+
+Inspiration:
+Die Struktur darf sich am Menübereich der Facebook-App orientieren, soll aber deutlich cleaner, moderner und hochwertiger wirken.
+
+Inhalte:
+- hochwertiger Profilbereich oben mit:
+  - Profilbild
+  - Name
+  - Rolle
+  - „Profil bearbeiten“
+- darunter Menüpunkte wie:
+  - Mein Profil
+  - Benachrichtigungen
+  - Meetings
+  - Verfügbarkeiten
+  - Einstellungen
+  - Support / Feedback
+  - Abmelden
+
+Funktional:
+- klickbare Menüpunkte
+- klare Hierarchie
+- Profilbereich als Highlight
+- optionale Badges, Untertitel und Chevron-Hinweise
+- Abmelden klar erkennbar, aber stilistisch passend
+
+MOCK-DATEN
+Nutze lokale Mock-Daten für:
+- User-Profil
+- Feed-Beiträge
+- Schichten
+- Kalenderdaten
+- Zeiterfassungsbuchungen
+- Tauschanfragen
+- Menüeinträge
+
+REALISTISCHE UI-STATES
+Berücksichtige appweit:
+- loading
+- empty
+- active
+- selected
+- disabled
+- success
+- changed
+- pinned
+- error
+- focused
+- pressed
+
+CODE-QUALITÄT
+Der Code soll:
+- sauber strukturiert
+- modular
+- konsistent benannt
+- gut wartbar
+- direkt weiterentwickelbar
+sein.
+
+WICHTIG
+Priorisiere nicht nur schöne Visuals, sondern echte Umsetzbarkeit. Erstelle eine reale, produktionsnahe React-Native-Expo-Basis für die „Alte Zimmerei Staff App“, inklusive Design-System, Navigation, wiederverwendbarer Komponenten, Mock-Daten und funktionaler Hauptscreens.
