@@ -25,7 +25,6 @@ export function SettingsModal({ visible, onClose }: SettingsModalProps) {
 
   const [sound, setSound] = useState(true);
   const [vibration, setVibration] = useState(true);
-  const [autoCheckIn, setAutoCheckIn] = useState(false);
   const [showWeekends, setShowWeekends] = useState(true);
   const [compactView, setCompactView] = useState(false);
   const [language, setLanguage] = useState("Deutsch");
@@ -90,18 +89,6 @@ export function SettingsModal({ visible, onClose }: SettingsModalProps) {
           value: compactView,
           onChange: setCompactView,
           icon: "layout",
-        },
-      ],
-    },
-    {
-      title: "Zeiterfassung",
-      items: [
-        {
-          label: "Auto-Einstempeln",
-          sub: "Beim Betreten des Standorts",
-          value: autoCheckIn,
-          onChange: setAutoCheckIn,
-          icon: "map-pin",
         },
       ],
     },
