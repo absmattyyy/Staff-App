@@ -10,5 +10,5 @@ export const mockUser: User = {
   email: "anna.mueller@alte-zimmerei.de",
   phone: "+49 170 1234567",
   joinedAt: "2021-03-15",
-  isAdmin: false,
+  isAdmin: true,
 };

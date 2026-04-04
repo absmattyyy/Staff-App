@@ -13,7 +13,10 @@ import type { FeedPost, Comment } from "@/types";
 interface FeedContextValue {
   posts: FeedPost[];
   comments: Comment[];
-  addPost: (content: string, category: "news" | "general") => void;
+  addPost: (content: string, category: "news" | "general", isImportant?: boolean) => void;
+  deletePost: (postId: string) => void;
+  togglePin: (postId: string) => void;
+  updatePost: (postId: string, content: string) => void;
   toggleLike: (postId: string) => void;
   likedPostIds: Set<string>;
   addComment: (postId: string, content: string) => void;
@@ -28,7 +31,7 @@ export function FeedProvider({ children }: { children: ReactNode }) {
   const [likedPostIds, setLikedPostIds] = useState<Set<string>>(new Set());
 
   const addPost = useCallback(
-    (content: string, category: "news" | "general") => {
+    (content: string, category: "news" | "general", isImportant = false) => {
       const newPost: FeedPost = {
         id: `p_${Date.now()}`,
         author: {
@@ -40,7 +43,7 @@ export function FeedProvider({ children }: { children: ReactNode }) {
         category,
         createdAt: new Date().toISOString(),
         isPinned: false,
-        isImportant: false,
+        isImportant,
         reactions: { like: 0, heart: 0, thumbsUp: 0 },
         commentsCount: 0,
       };
@@ -48,6 +51,24 @@ export function FeedProvider({ children }: { children: ReactNode }) {
     },
     []
   );
+
+  const deletePost = useCallback((postId: string) => {
+    setPosts((prev) => prev.filter((p) => p.id !== postId));
+  }, []);
+
+  const togglePin = useCallback((postId: string) => {
+    setPosts((prev) =>
+      prev.map((p) =>
+        p.id === postId ? { ...p, isPinned: !p.isPinned } : p
+      )
+    );
+  }, []);
+
+  const updatePost = useCallback((postId: string, content: string) => {
+    setPosts((prev) =>
+      prev.map((p) => (p.id === postId ? { ...p, content } : p))
+    );
+  }, []);
 
   const toggleLike = useCallback((postId: string) => {
     setLikedPostIds((prev) => {
@@ -108,6 +129,9 @@ export function FeedProvider({ children }: { children: ReactNode }) {
         posts,
         comments: allComments,
         addPost,
+        deletePost,
+        togglePin,
+        updatePost,
         toggleLike,
         likedPostIds,
         addComment,

@@ -10,6 +10,7 @@ import {
   Platform,
   ScrollView,
   ActivityIndicator,
+  Switch,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -31,6 +32,7 @@ export function CreatePostModal({ visible, onClose }: CreatePostModalProps) {
 
   const [content, setContent] = useState("");
   const [category, setCategory] = useState<"news" | "general">("general");
+  const [isImportant, setIsImportant] = useState(false);
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<TextInput>(null);
 
@@ -40,16 +42,18 @@ export function CreatePostModal({ visible, onClose }: CreatePostModalProps) {
     if (!canPost) return;
     setLoading(true);
     await new Promise((r) => setTimeout(r, 300));
-    addPost(content.trim(), category);
+    addPost(content.trim(), category, user.isAdmin ? isImportant : false);
     setLoading(false);
     setContent("");
     setCategory("general");
+    setIsImportant(false);
     onClose();
   };
 
   const handleClose = () => {
     setContent("");
     setCategory("general");
+    setIsImportant(false);
     onClose();
   };
 
@@ -233,6 +237,63 @@ export function CreatePostModal({ visible, onClose }: CreatePostModalProps) {
               {content.length}/2000
             </Text>
 
+            {/* Important toggle – only for admins */}
+            {user.isAdmin && (
+              <View
+                style={[
+                  styles.importantRow,
+                  {
+                    backgroundColor: isImportant
+                      ? colors.destructive + "10"
+                      : colors.muted,
+                    borderColor: isImportant
+                      ? colors.destructive + "40"
+                      : colors.border,
+                  },
+                ]}
+              >
+                <View style={styles.importantLeft}>
+                  <Feather
+                    name="alert-circle"
+                    size={15}
+                    color={isImportant ? colors.destructive : colors.mutedForeground}
+                  />
+                  <View style={styles.importantTextBlock}>
+                    <Text
+                      style={[
+                        styles.importantLabel,
+                        {
+                          color: isImportant
+                            ? colors.destructive
+                            : colors.foreground,
+                          fontFamily: "Inter_500Medium",
+                        },
+                      ]}
+                    >
+                      Als wichtig markieren
+                    </Text>
+                    <Text
+                      style={[
+                        styles.importantSub,
+                        { color: colors.mutedForeground, fontFamily: "Inter_400Regular" },
+                      ]}
+                    >
+                      Wird für alle Mitarbeiter hervorgehoben
+                    </Text>
+                  </View>
+                </View>
+                <Switch
+                  value={isImportant}
+                  onValueChange={setIsImportant}
+                  trackColor={{
+                    false: colors.border,
+                    true: colors.destructive,
+                  }}
+                  thumbColor={colors.background}
+                />
+              </View>
+            )}
+
             {/* Tips */}
             <View
               style={[styles.tipBox, { backgroundColor: colors.muted, borderColor: colors.border }]}
@@ -332,7 +393,32 @@ const styles = StyleSheet.create({
   charCount: {
     fontSize: 12,
     textAlign: "right",
-    marginBottom: 20,
+    marginBottom: 16,
+  },
+  importantRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 16,
+  },
+  importantLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    flex: 1,
+  },
+  importantTextBlock: {
+    gap: 2,
+    flex: 1,
+  },
+  importantLabel: {
+    fontSize: 14,
+  },
+  importantSub: {
+    fontSize: 12,
   },
   tipBox: {
     flexDirection: "row",

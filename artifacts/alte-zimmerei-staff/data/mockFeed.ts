@@ -129,4 +129,20 @@ export const mockFeedPosts: FeedPost[] = [
     reactions: { like: 16, heart: 0, thumbsUp: 14 },
     commentsCount: 2,
   },
+  {
+    id: "p_own1",
+    author: {
+      id: "u1",
+      name: "Anna Müller",
+      role: "Serviceleiterin",
+    },
+    content:
+      "Kurze Info: Ich habe die Tischreservierungen für nächste Woche aktualisiert. Bitte schaut kurz rein, damit ihr einen Überblick habt.",
+    createdAt: "2026-04-04T08:15:00",
+    category: "general",
+    isPinned: false,
+    isImportant: false,
+    reactions: { like: 3, heart: 0, thumbsUp: 2 },
+    commentsCount: 0,
+  },
 ];
