@@ -120,22 +120,6 @@ export function ShiftCard({ shift, onPress, compact = false }: ShiftCardProps) {
           </Text>
         </View>
 
-        {!compact && (
-          <View style={styles.infoRow}>
-            <Feather name="user" size={12} color={colors.mutedForeground} />
-            <Text
-              style={[
-                styles.infoText,
-                {
-                  color: colors.mutedForeground,
-                  fontFamily: "Inter_400Regular",
-                },
-              ]}
-            >
-              {shift.role}
-            </Text>
-          </View>
-        )}
 
         {shift.notes && !compact && (
           <View

@@ -219,9 +219,6 @@ export function EventDetailModal({ event, onClose }: EventDetailModalProps) {
                     <Text style={[styles.staffName, { color: colors.foreground, fontFamily: "Inter_500Medium" }]}>
                       {member.name}
                     </Text>
-                    <Text style={[styles.staffRole, { color: colors.mutedForeground, fontFamily: "Inter_400Regular" }]}>
-                      {member.role}
-                    </Text>
                   </View>
                 </View>
               ))}

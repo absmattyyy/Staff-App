@@ -145,20 +145,6 @@ export function SwapCard({
             {swap.shift.eventName} · {swap.shift.location}
           </Text>
         </View>
-        <View style={styles.shiftRow}>
-          <Feather name="user" size={13} color={colors.mutedForeground} />
-          <Text
-            style={[
-              styles.shiftText,
-              {
-                color: colors.mutedForeground,
-                fontFamily: "Inter_400Regular",
-              },
-            ]}
-          >
-            {swap.shift.role}
-          </Text>
-        </View>
       </View>
 
       {swap.note && (

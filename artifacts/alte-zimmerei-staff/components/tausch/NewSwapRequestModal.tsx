@@ -340,7 +340,7 @@ export function NewSwapRequestModal({
                           ]}
                           numberOfLines={1}
                         >
-                          {shift.role} · {shift.location}
+                          {shift.location}
                         </Text>
                       </View>
                     </View>
