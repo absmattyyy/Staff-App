@@ -6,7 +6,7 @@ import {
   useFonts,
 } from "@expo-google-fonts/inter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Stack } from "expo-router";
+import { Redirect, Stack, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -16,6 +16,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AuthProvider } from "@/context/AuthContext";
 import { AppProvider } from "@/context/AppContext";
+import { useAuth } from "@/context/AuthContext";
 import { FeedProvider } from "@/context/FeedContext";
 import { DienstplanProvider } from "@/context/DienstplanContext";
 import { SwapProvider } from "@/context/SwapContext";
@@ -25,8 +26,23 @@ SplashScreen.preventAutoHideAsync();
 const queryClient = new QueryClient();
 
 function RootLayoutNav() {
+  const { token, isLoading } = useAuth();
+  const segments = useSegments();
+  const isLoginRoute = segments[0] === "login";
+
+  if (isLoading) return null;
+
+  if (!token && !isLoginRoute) {
+    return <Redirect href="/login" />;
+  }
+
+  if (token && isLoginRoute) {
+    return <Redirect href="/(tabs)/feed" />;
+  }
+
   return (
     <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="login" options={{ headerShown: false }} />
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
     </Stack>
   );
