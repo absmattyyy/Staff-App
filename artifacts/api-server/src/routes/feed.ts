@@ -161,17 +161,25 @@ router.post("/feed/:id/like", requireAuth, async (req, res) => {
     await db
       .delete(feedLikesTable)
       .where(and(eq(feedLikesTable.postId, postId), eq(feedLikesTable.userId, userId)));
+    const likes = await db
+      .select({ id: feedLikesTable.id })
+      .from(feedLikesTable)
+      .where(eq(feedLikesTable.postId, postId));
     await db
       .update(feedPostsTable)
-      .set({ likesCount: db.$count(feedLikesTable, eq(feedLikesTable.postId, postId)) as unknown as number })
+      .set({ likesCount: likes.length })
       .where(eq(feedPostsTable.id, postId));
-    const [p] = await db.select().from(feedPostsTable).where(eq(feedPostsTable.id, postId)).limit(1);
-    await db.update(feedPostsTable).set({ likesCount: Math.max(0, (p?.likesCount ?? 1) - 1) }).where(eq(feedPostsTable.id, postId));
     res.json({ liked: false });
   } else {
     await db.insert(feedLikesTable).values({ postId, userId });
-    const [p] = await db.select().from(feedPostsTable).where(eq(feedPostsTable.id, postId)).limit(1);
-    await db.update(feedPostsTable).set({ likesCount: (p?.likesCount ?? 0) + 1 }).where(eq(feedPostsTable.id, postId));
+    const likes = await db
+      .select({ id: feedLikesTable.id })
+      .from(feedLikesTable)
+      .where(eq(feedLikesTable.postId, postId));
+    await db
+      .update(feedPostsTable)
+      .set({ likesCount: likes.length })
+      .where(eq(feedPostsTable.id, postId));
     res.json({ liked: true });
   }
 });
