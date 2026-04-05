@@ -3,20 +3,20 @@ import React, {
   useContext,
   useState,
   useCallback,
+  useEffect,
   ReactNode,
 } from "react";
-import { mockShifts } from "@/data/mockShifts";
-import { mockEvents } from "@/data/mockEvents";
-import { mockUser } from "@/data/mockUser";
+import { useAuth } from "@/context/AuthContext";
+import { apiFetch } from "@/constants/api";
 import type { Shift, Event, Unavailability } from "@/types";
 
 interface DienstplanContextValue {
   shifts: Shift[];
   events: Event[];
   unavailabilities: Unavailability[];
-  addEvent: (event: Omit<Event, "id" | "status">) => void;
-  updateEvent: (id: string, updates: Partial<Event>) => void;
-  deleteEvent: (id: string) => void;
+  addEvent: (event: Omit<Event, "id" | "status">) => Promise<void>;
+  updateEvent: (id: string, updates: Partial<Event>) => Promise<void>;
+  deleteEvent: (id: string) => Promise<void>;
   getEventById: (id: string) => Event | undefined;
   addUnavailability: (date: string, reason?: string) => void;
   removeUnavailability: (id: string) => void;
@@ -25,65 +25,119 @@ interface DienstplanContextValue {
   dismissShiftChange: (shiftId: string) => void;
   dismissedChangeIds: Set<string>;
   transferShift: (shiftId: string) => void;
+  refresh: () => Promise<void>;
 }
 
 const DienstplanContext = createContext<DienstplanContextValue | null>(null);
 
 export function DienstplanProvider({ children }: { children: ReactNode }) {
-  const [shifts, setShifts] = useState<Shift[]>(mockShifts);
-  const [events, setEvents] = useState<Event[]>(mockEvents);
+  const { user, token } = useAuth();
+  const [shifts, setShifts] = useState<Shift[]>([]);
+  const [events, setEvents] = useState<Event[]>([]);
   const [unavailabilities, setUnavailabilities] = useState<Unavailability[]>([]);
   const [dismissedChangeIds, setDismissedChangeIds] = useState<Set<string>>(new Set());
 
-  const addEvent = useCallback((eventData: Omit<Event, "id" | "status">) => {
-    const newEvent: Event = {
-      ...eventData,
-      id: `e_${Date.now()}`,
-      status: "upcoming",
-    };
-    setEvents((prev) => [newEvent, ...prev].sort((a, b) => a.date.localeCompare(b.date)));
+  const loadData = useCallback(async () => {
+    if (!token) return;
+    try {
+      const [shiftsRes, eventsRes] = await Promise.all([
+        apiFetch("/shifts", { token }),
+        apiFetch("/events", { token }),
+      ]);
+      if (shiftsRes.ok) {
+        const data = await shiftsRes.json();
+        setShifts(data);
+      }
+      if (eventsRes.ok) {
+        const data = await eventsRes.json();
+        setEvents(
+          data.map((e: any) => ({
+            id: e.id,
+            name: e.name,
+            date: e.date,
+            startTime: e.startTime,
+            endTime: e.endTime,
+            location: e.location,
+            description: e.description,
+            djs: e.djs || [],
+            staff: e.staff || [],
+            flyerUri: e.flyerUri,
+            status: e.status,
+            protocol: e.protocol,
+          }))
+        );
+      }
+    } catch {}
+  }, [token]);
 
-    const newShifts: Shift[] = eventData.staff.map((member, idx) => ({
-      id: `s_${Date.now()}_${idx}`,
-      date: eventData.date,
-      startTime: eventData.startTime,
-      endTime: eventData.endTime,
-      eventName: eventData.name,
-      eventId: newEvent.id,
-      role: member.role,
-      location: eventData.location,
-      status: "confirmed",
-      isOwn: member.id === mockUser.id,
-    }));
-    setShifts((prev) => [...prev, ...newShifts]);
-  }, []);
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
-  const updateEvent = useCallback((id: string, updates: Partial<Event>) => {
-    setEvents((prev) =>
-      prev.map((e) => (e.id === id ? { ...e, ...updates } : e))
-    );
-  }, []);
+  const addEvent = useCallback(
+    async (eventData: Omit<Event, "id" | "status">) => {
+      if (!token) return;
+      const res = await apiFetch("/events", {
+        method: "POST",
+        body: JSON.stringify(eventData),
+        token,
+      });
+      if (res.ok) {
+        await loadData();
+      }
+    },
+    [token, loadData]
+  );
 
-  const deleteEvent = useCallback((id: string) => {
-    setEvents((prev) => prev.filter((e) => e.id !== id));
-    setShifts((prev) => prev.filter((s) => s.eventId !== id));
-  }, []);
+  const updateEvent = useCallback(
+    async (id: string, updates: Partial<Event>) => {
+      if (!token) return;
+      const res = await apiFetch(`/events/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(updates),
+        token,
+      });
+      if (res.ok) {
+        await loadData();
+      }
+    },
+    [token, loadData]
+  );
+
+  const deleteEvent = useCallback(
+    async (id: string) => {
+      if (!token) return;
+      const res = await apiFetch(`/events/${id}`, {
+        method: "DELETE",
+        token,
+      });
+      if (res.ok || res.status === 204) {
+        setEvents((prev) => prev.filter((e) => e.id !== id));
+        setShifts((prev) => prev.filter((s) => s.eventId !== id));
+      }
+    },
+    [token]
+  );
 
   const getEventById = useCallback(
     (id: string) => events.find((e) => e.id === id),
     [events]
   );
 
-  const addUnavailability = useCallback((date: string, reason?: string) => {
-    const entry: Unavailability = {
-      id: `u_${Date.now()}`,
-      userId: mockUser.id,
-      userName: mockUser.name,
-      date,
-      reason,
-    };
-    setUnavailabilities((prev) => [...prev, entry]);
-  }, []);
+  const addUnavailability = useCallback(
+    (date: string, reason?: string) => {
+      if (!user) return;
+      const entry: Unavailability = {
+        id: `u_${Date.now()}`,
+        userId: user.id,
+        userName: user.name,
+        date,
+        reason,
+      };
+      setUnavailabilities((prev) => [...prev, entry]);
+    },
+    [user]
+  );
 
   const removeUnavailability = useCallback((id: string) => {
     setUnavailabilities((prev) => prev.filter((u) => u.id !== id));
@@ -91,7 +145,7 @@ export function DienstplanProvider({ children }: { children: ReactNode }) {
 
   const myUnavailabilityDates = new Set(
     unavailabilities
-      .filter((u) => u.userId === mockUser.id)
+      .filter((u) => u.userId === user?.id)
       .map((u) => u.date)
   );
 
@@ -107,11 +161,20 @@ export function DienstplanProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const transferShift = useCallback((shiftId: string) => {
-    setShifts((prev) =>
-      prev.map((s) => (s.id === shiftId ? { ...s, isOwn: false } : s))
-    );
-  }, []);
+  const transferShift = useCallback(
+    async (shiftId: string) => {
+      if (!token) return;
+      await apiFetch(`/shifts/${shiftId}`, {
+        method: "PUT",
+        body: JSON.stringify({ status: "open" }),
+        token,
+      }).catch(() => {});
+      setShifts((prev) =>
+        prev.map((s) => (s.id === shiftId ? { ...s, isOwn: false } : s))
+      );
+    },
+    [token]
+  );
 
   return (
     <DienstplanContext.Provider
@@ -130,6 +193,7 @@ export function DienstplanProvider({ children }: { children: ReactNode }) {
         dismissShiftChange,
         dismissedChangeIds,
         transferShift,
+        refresh: loadData,
       }}
     >
       {children}

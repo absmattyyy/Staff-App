@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -8,14 +8,16 @@ import {
   Alert,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useFocusEffect } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import { useColors } from "@/hooks/useColors";
 import { useAppContext } from "@/context/AppContext";
+import { useAuth } from "@/context/AuthContext";
+import { apiFetch } from "@/constants/api";
 import { ClockWidget } from "@/components/zeiterfassung/ClockWidget";
 import { Card } from "@/components/ui/Card";
 import { SectionHeader } from "@/components/ui/SectionHeader";
-import { mockTimeRecords, monthlyStats } from "@/data/mockTimeRecords";
-import type { BookingType } from "@/types";
+import type { BookingType, TimeRecord } from "@/types";
 
 const BOOKING_LABELS: Partial<Record<BookingType, string>> = {
   checkin: "Einstempeln",
@@ -47,14 +49,70 @@ function formatDate(dateStr: string): string {
   });
 }
 
+function computeWorkedMinutes(records: TimeRecord[]): number {
+  let total = 0;
+  for (const record of records) {
+    const bookings = record.bookings;
+    let checkinTime: string | null = null;
+    let breakStart: string | null = null;
+    let breakMinutes = 0;
+    for (const b of bookings) {
+      if (b.type === "checkin") checkinTime = b.time;
+      if (b.type === "break_start") breakStart = b.time;
+      if (b.type === "break_end" && breakStart) {
+        const [bsh, bsm] = breakStart.split(":").map(Number);
+        const [beh, bem] = b.time.split(":").map(Number);
+        breakMinutes += (beh * 60 + bem) - (bsh * 60 + bsm);
+        breakStart = null;
+      }
+      if (b.type === "checkout" && checkinTime) {
+        const [cih, cim] = checkinTime.split(":").map(Number);
+        const [coh, com] = b.time.split(":").map(Number);
+        total += (coh * 60 + com) - (cih * 60 + cim) - breakMinutes;
+        breakMinutes = 0;
+      }
+    }
+  }
+  return total;
+}
+
 export default function ZeiterfassungScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
+  const { token } = useAuth();
   const { isCheckedIn, checkInTime, checkIn, checkOut } = useAppContext();
+  const [timeRecords, setTimeRecords] = useState<TimeRecord[]>([]);
+  const [workedHours, setWorkedHours] = useState(0);
 
   const isWeb = Platform.OS === "web";
   const topPad = isWeb ? 67 : insets.top;
   const bottomPad = isWeb ? 34 : insets.bottom;
+
+  const currentMonth = new Date().toISOString().slice(0, 7);
+  const monthLabel = new Date().toLocaleDateString("de-DE", {
+    month: "long",
+    year: "numeric",
+  });
+
+  const loadRecords = useCallback(async () => {
+    if (!token) return;
+    try {
+      const res = await apiFetch(`/time-records?month=${currentMonth}`, { token });
+      if (res.ok) {
+        const data: TimeRecord[] = await res.json();
+        const sorted = [...data].sort((a, b) => b.date.localeCompare(a.date));
+        setTimeRecords(sorted);
+        const minutes = computeWorkedMinutes(data);
+        setWorkedHours(Math.round((minutes / 60) * 10) / 10);
+      }
+    } catch {}
+  }, [token, currentMonth]);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadRecords();
+    }, [loadRecords])
+  );
 
   const handleCheckOut = () => {
     Alert.alert(
@@ -62,12 +120,24 @@ export default function ZeiterfassungScreen() {
       "Möchtest du jetzt ausstempeln?",
       [
         { text: "Abbrechen", style: "cancel" },
-        { text: "Ausstempeln", style: "destructive", onPress: checkOut },
+        {
+          text: "Ausstempeln",
+          style: "destructive",
+          onPress: async () => {
+            await checkOut();
+            loadRecords();
+          },
+        },
       ]
     );
   };
 
-  const recentRecords = mockTimeRecords.slice(1).map((record) => ({
+  const handleCheckIn = async () => {
+    await checkIn();
+    loadRecords();
+  };
+
+  const recentRecords = timeRecords.slice(1).map((record) => ({
     ...record,
     bookings: record.bookings.filter(
       (b) => b.type !== "break_start" && b.type !== "break_end"
@@ -107,13 +177,13 @@ export default function ZeiterfassungScreen() {
           <ClockWidget
             isCheckedIn={isCheckedIn}
             checkInTime={checkInTime}
-            onCheckIn={checkIn}
+            onCheckIn={handleCheckIn}
             onCheckOut={handleCheckOut}
           />
         </Card>
 
         <Card style={styles.statsCard}>
-          <SectionHeader title="April 2026" style={{ marginBottom: 12 }} />
+          <SectionHeader title={monthLabel} style={{ marginBottom: 12 }} />
           <View style={styles.statsRow}>
             <View style={styles.statItem}>
               <Text
@@ -122,7 +192,7 @@ export default function ZeiterfassungScreen() {
                   { color: colors.foreground, fontFamily: "Inter_700Bold" },
                 ]}
               >
-                {monthlyStats.workedHours}h
+                {workedHours}h
               </Text>
               <Text
                 style={[
@@ -136,83 +206,77 @@ export default function ZeiterfassungScreen() {
           </View>
         </Card>
 
-        <SectionHeader title="Letzte Buchungen" style={styles.sectionHeader} />
+        {recentRecords.length > 0 && (
+          <>
+            <SectionHeader title="Letzte Buchungen" style={styles.sectionHeader} />
 
-        {recentRecords.map((record) => (
-          <Card key={record.date} noPadding style={{ marginBottom: 10 }}>
-            <View
-              style={[
-                styles.dateHeader,
-                { borderBottomColor: colors.border },
-              ]}
-            >
-              <Text
-                style={[
-                  styles.dateText,
-                  { color: colors.foreground, fontFamily: "Inter_600SemiBold" },
-                ]}
-              >
-                {formatDate(record.date)}
-              </Text>
-              {record.totalMinutes && (
-                <Text
-                  style={[
-                    styles.totalTime,
-                    { color: colors.primary, fontFamily: "Inter_600SemiBold" },
-                  ]}
-                >
-                  {formatMinutes(record.totalMinutes - (record.breakMinutes ?? 0))}
-                </Text>
-              )}
-            </View>
-
-            {record.bookings.map((booking, idx) => (
-              <View
-                key={booking.id}
-                style={[
-                  styles.bookingRow,
-                  idx < record.bookings.length - 1 && {
-                    borderBottomColor: colors.border,
-                    borderBottomWidth: StyleSheet.hairlineWidth,
-                  },
-                ]}
-              >
+            {recentRecords.map((record) => (
+              <Card key={record.date} noPadding style={{ marginBottom: 10 }}>
                 <View
                   style={[
-                    styles.bookingIcon,
-                    {
-                      backgroundColor:
-                        (BOOKING_COLORS[booking.type] ?? colors.muted) + "22",
-                      borderRadius: 8,
-                    },
+                    styles.dateHeader,
+                    { borderBottomColor: colors.border },
                   ]}
                 >
-                  <Feather
-                    name={BOOKING_ICONS[booking.type] as any}
-                    size={14}
-                    color={BOOKING_COLORS[booking.type] ?? colors.mutedForeground}
-                  />
+                  <Text
+                    style={[
+                      styles.dateText,
+                      { color: colors.foreground, fontFamily: "Inter_600SemiBold" },
+                    ]}
+                  >
+                    {formatDate(record.date)}
+                  </Text>
                 </View>
-                <Text
-                  style={[
-                    styles.bookingLabel,
-                    { color: colors.foreground, fontFamily: "Inter_400Regular" },
-                  ]}
-                >
-                  {BOOKING_LABELS[booking.type]}
-                </Text>
-                <Text
-                  style={[
-                    styles.bookingTime,
-                    { color: colors.mutedForeground, fontFamily: "Inter_500Medium" },
-                  ]}
-                >
-                  {booking.time}
-                </Text>
-              </View>
+
+                {record.bookings.map((booking, idx) => (
+                  <View
+                    key={booking.id}
+                    style={[
+                      styles.bookingRow,
+                      idx < record.bookings.length - 1 && {
+                        borderBottomColor: colors.border,
+                        borderBottomWidth: StyleSheet.hairlineWidth,
+                      },
+                    ]}
+                  >
+                    <View
+                      style={[
+                        styles.bookingIcon,
+                        {
+                          backgroundColor:
+                            (BOOKING_COLORS[booking.type] ?? colors.muted) + "22",
+                          borderRadius: 8,
+                        },
+                      ]}
+                    >
+                      <Feather
+                        name={BOOKING_ICONS[booking.type] as any}
+                        size={14}
+                        color={BOOKING_COLORS[booking.type] ?? colors.mutedForeground}
+                      />
+                    </View>
+                    <Text
+                      style={[
+                        styles.bookingLabel,
+                        { color: colors.foreground, fontFamily: "Inter_400Regular" },
+                      ]}
+                    >
+                      {BOOKING_LABELS[booking.type]}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.bookingTime,
+                        { color: colors.mutedForeground, fontFamily: "Inter_500Medium" },
+                      ]}
+                    >
+                      {booking.time}
+                    </Text>
+                  </View>
+                ))}
+              </Card>
             ))}
-          </Card>
-        ))}
+          </>
+        )}
       </ScrollView>
     </View>
   );
@@ -269,9 +333,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   dateText: {
-    fontSize: 14,
-  },
-  totalTime: {
     fontSize: 14,
   },
   bookingRow: {
