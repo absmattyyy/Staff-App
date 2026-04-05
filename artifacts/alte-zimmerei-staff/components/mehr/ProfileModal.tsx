@@ -186,17 +186,6 @@ export function ProfileModal({ visible, onClose, user }: ProfileModalProps) {
               >
                 {user.role}
               </Text>
-              <Text
-                style={[
-                  styles.userDept,
-                  {
-                    color: colors.mutedForeground,
-                    fontFamily: "Inter_400Regular",
-                  },
-                ]}
-              >
-                {user.department}
-              </Text>
             </View>
 
             <Text
@@ -302,92 +291,6 @@ export function ProfileModal({ visible, onClose, user }: ProfileModalProps) {
                 },
               ]}
             >
-              <View style={styles.fieldRow}>
-                <View
-                  style={[
-                    styles.fieldIcon,
-                    {
-                      backgroundColor: colors.primary + "18",
-                      borderRadius: 8,
-                    },
-                  ]}
-                >
-                  <Feather name="briefcase" size={14} color={colors.primary} />
-                </View>
-                <View style={styles.fieldContent}>
-                  <Text
-                    style={[
-                      styles.fieldLabel,
-                      {
-                        color: colors.mutedForeground,
-                        fontFamily: "Inter_400Regular",
-                      },
-                    ]}
-                  >
-                    Funktion
-                  </Text>
-                  <Text
-                    style={[
-                      styles.fieldValue,
-                      {
-                        color: colors.foreground,
-                        fontFamily: "Inter_500Medium",
-                      },
-                    ]}
-                  >
-                    {user.role}
-                  </Text>
-                </View>
-              </View>
-              <View
-                style={[
-                  styles.divider,
-                  { backgroundColor: colors.border, marginLeft: 50 },
-                ]}
-              />
-              <View style={styles.fieldRow}>
-                <View
-                  style={[
-                    styles.fieldIcon,
-                    {
-                      backgroundColor: colors.primary + "18",
-                      borderRadius: 8,
-                    },
-                  ]}
-                >
-                  <Feather name="layers" size={14} color={colors.primary} />
-                </View>
-                <View style={styles.fieldContent}>
-                  <Text
-                    style={[
-                      styles.fieldLabel,
-                      {
-                        color: colors.mutedForeground,
-                        fontFamily: "Inter_400Regular",
-                      },
-                    ]}
-                  >
-                    Abteilung
-                  </Text>
-                  <Text
-                    style={[
-                      styles.fieldValue,
-                      {
-                        color: colors.foreground,
-                        fontFamily: "Inter_500Medium",
-                      },
-                    ]}
-                  >
-                    {user.department}
-                  </Text>
-                </View>
-              </View>
-              <View
-                style={[
-                  styles.divider,
-                  { backgroundColor: colors.border, marginLeft: 50 },
-                ]}
-              />
               <View style={styles.fieldRow}>
                 <View
                   style={[

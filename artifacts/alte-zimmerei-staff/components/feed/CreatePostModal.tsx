@@ -144,14 +144,6 @@ export function CreatePostModal({ visible, onClose }: CreatePostModalProps) {
                 >
                   {user.name}
                 </Text>
-                <Text
-                  style={[
-                    styles.authorRole,
-                    { color: colors.mutedForeground, fontFamily: "Inter_400Regular" },
-                  ]}
-                >
-                  {user.role}
-                </Text>
               </View>
             </View>
 

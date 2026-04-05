@@ -56,14 +56,6 @@ function CommentItem({ comment, colors }: { comment: Comment; colors: any }) {
             >
               {comment.author.name}
             </Text>
-            <Text
-              style={[
-                styles.commentRole,
-                { color: colors.mutedForeground, fontFamily: "Inter_400Regular" },
-              ]}
-            >
-              {comment.author.role}
-            </Text>
           </View>
           <Text
             style={[

@@ -141,17 +141,6 @@ export default function MehrScreen() {
               >
                 {user.role}
               </Text>
-              <Text
-                style={[
-                  styles.profileDept,
-                  {
-                    color: colors.mutedForeground,
-                    fontFamily: "Inter_400Regular",
-                  },
-                ]}
-              >
-                {user.department}
-              </Text>
             </View>
             <View style={styles.profileEdit}>
               <Feather name="edit-2" size={16} color={colors.mutedForeground} />

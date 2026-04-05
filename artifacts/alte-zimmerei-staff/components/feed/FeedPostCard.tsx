@@ -150,15 +150,6 @@ export function FeedPostCard({ post, onOpenComments }: FeedPostCardProps) {
                   { color: colors.mutedForeground, fontFamily: "Inter_400Regular" },
                 ]}
               >
-                {livePost.author.role}
-              </Text>
-              <Text style={[styles.dot, { color: colors.mutedForeground }]}>·</Text>
-              <Text
-                style={[
-                  styles.meta,
-                  { color: colors.mutedForeground, fontFamily: "Inter_400Regular" },
-                ]}
-              >
                 {formatTime(livePost.createdAt)}
               </Text>
             </View>

@@ -3,8 +3,7 @@ export interface User {
   name: string;
   firstName: string;
   lastName: string;
-  role: string;
-  department: string;
+  role: "Mitarbeiter" | "Inhaber";
   avatar?: string;
   email: string;
   phone?: string;
