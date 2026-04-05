@@ -28,9 +28,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [checkInTime, setCheckInTime] = useState<string | undefined>(undefined);
   const [isOnBreak, setIsOnBreak] = useState(false);
 
+  const getLocalDate = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
   useEffect(() => {
-    if (!token) return;
-    const today = new Date().toISOString().slice(0, 10);
+    if (!token) {
+      setIsCheckedIn(false);
+      setCheckInTime(undefined);
+      setIsOnBreak(false);
+      return;
+    }
+    const today = getLocalDate();
     apiFetch(`/time-records?date=${today}`, { token }).then(async (res) => {
       if (!res.ok) return;
       const data: { date: string; bookings: { type: string; time: string }[] }[] = await res.json();
@@ -58,9 +71,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const getNow = () => {
     const now = new Date();
+
     return {
       time: now.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit", hour12: false }),
-      date: now.toISOString().slice(0, 10),
+      date: getLocalDate(),
     };
   };
 
@@ -107,7 +121,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
   }, [token]);
 
-  const user = authUser as User;
+  const user: User = authUser ?? {
+    id: "",
+    name: "",
+    firstName: "",
+    lastName: "",
+    role: "Mitarbeiter",
+    email: "",
+    joinedAt: "",
+    isAdmin: false,
+  };
 
   return (
     <AppContext.Provider
