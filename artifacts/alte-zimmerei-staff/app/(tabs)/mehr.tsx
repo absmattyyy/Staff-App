@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import * as Haptics from "expo-haptics";
 import { useColors } from "@/hooks/useColors";
 import { Avatar } from "@/components/ui/Avatar";
@@ -17,6 +18,7 @@ import { ListItem } from "@/components/ui/ListItem";
 import { Card } from "@/components/ui/Card";
 import { mockMenuItems } from "@/data/mockMenu";
 import { useAppContext } from "@/context/AppContext";
+import { useAuth } from "@/context/AuthContext";
 import { ProfileModal } from "@/components/mehr/ProfileModal";
 import { NotificationsModal } from "@/components/mehr/NotificationsModal";
 import { MeetingsModal } from "@/components/mehr/MeetingsModal";
@@ -28,6 +30,8 @@ export default function MehrScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { user } = useAppContext();
+  const { logout } = useAuth();
+  const router = useRouter();
 
   const isWeb = Platform.OS === "web";
   const topPad = isWeb ? 67 : insets.top;
@@ -70,8 +74,13 @@ export default function MehrScreen() {
             {
               text: "Abmelden",
               style: "destructive",
-              onPress: () => {
-                Alert.alert("Abgemeldet", "Du wurdest erfolgreich abgemeldet.");
+              onPress: async () => {
+                try {
+                  await logout();
+                  router.replace("/login");
+                } catch {
+                  Alert.alert("Fehler", "Abmelden fehlgeschlagen.");
+                }
               },
             },
           ]
